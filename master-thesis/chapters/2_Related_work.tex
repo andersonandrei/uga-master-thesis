@@ -1,0 +1,203 @@
+\chapter{State of the Art}
+\label{sec:related}
+
+This thesis is related to several terms and concepts into the development of an edge simulated platform focused in the scheduling of HPC jobs.
+Hence we have been studied the state of the art of these concepts follow as cluster, grid and cloud computing, the growth of IoT and Mobile devices as a reasonable usage of these computing platforms. Therefore, Edge computing has been studied.
+Regarding the allocation of HPC jobs, we will present some studies about this kind of job and its allocation process from different possible goals and views.
+Running these jobs in platforms as cluster, grid, edge or cloud, is visible the necessity to use metrics to evaluate the performance for that processes and techniques.
+So, we will present some of these techniques as load balance of HPC jobs and the usage of virtualization and containers to manage this kind of platform. In addition, as the energy consumption has been a very important problem related with all of these concepts, we will present some related works that handle it.
+In the sequence we will present some recent statistics by scientific studies and by the viewpoint of companies that emphasizes the emergency and the requirement of edge computing. Finally, we will show some related simulated platforms providing comparisons with the one utilized and developed during this work.
+
+\section{Computing Platforms, Difference and Evolution}
+
+In a survey, Huang et.al~\cite{survey_1} define three phases as the evolution of the computing platforms following the paradigm of data processing over the years.
+The mode of calculation has been changed along the time, and Cloud computing defines the current state.
+It shows this evolution process from the steps:
+
+\begin{enumerate}
+
+    \item  The original mode which for processing, gathered all the tasks to large-scale processors.
+    \item  The distributed tasks processing mode based on the Internet.
+    \item  The cloud computing mode for immediate processing.
+    
+\end{enumerate}
+
+Hameed Hussain et.al~\cite{survey_2}, defined as HPC categories, Cluster, Grid and Cloud computing platforms are conceptually similar, but its their main different features are emphasized as follow: 
+
+\begin{itemize}
+    
+    \item  on Clusters, the goal is to design an efficient computing platform that uses a group of commodity computer resources integrated through hardware, networks, and software to improve the performance and availability of a single computer resource, which 
+
+    \begin{itemize}
+    
+        \item A modern one is made up of a set of commodity computers that are usually restricted to a single switch or group of interconnected switches within a single virtual local-area network (VLAN). In addition to executing compute-intensive applications, cluster systems are also used for replicated storage and backup servers that provide essential fault tolerance and reliability for critical parallel applications. 
+        
+        \item Allows extensions by incorporating load balancing, parallel processing, multi-level system management, and scalability methodologies. 
+    
+    \end{itemize}
+    
+    \item  on Grid, the computing concept is based on using the Internet as a medium for the wide spread availability of powerful computing resources as low-cost commodity components . Computational grid can be thought of as a distributed system of logically coupled local clusters with non-interactive workloads that involve a large number of files. Emphasizing that grids tend to be more loosely coupled, heterogeneous, and geographically dispersed, makes grid different from conventional HPC systems, such as cluster.
+
+    \item  on Cloud, is found a recent model for Information Technology (IT) services based on the Internet, and typically involves provision of dynamically scalable and often virtualized resources over-the-Internet. Typical cloud computing providers deliver common business applications online that are accessed through web service, and the data and software are stored on the servers. In addition, the cloud computing systems are difficult to model with resource contention (competing access to shared resources). Many factors, such as the number of machines, types of application, and overall workload characteristics, can vary widely and affect the performance of the system.
+
+\end{itemize}
+
+Focusing on Grid Computing, Qureshi et.al ~\cite{survey_grid}, presents it as a platform for virtual organizations and computing environments that was introduced in 1990s, which:
+
+\begin{itemize}
+
+    \item  Provides low-cost intelligent methodologies for sharing data and resources such as computers, software applications, sensors, storage space, and network bandwidth due to the necessity of reliable, pervasive, and high computing power.
+    
+    \item  Depending on factors as operating system, amount of memory, CPU speed, number of resources, architecture types and so on, Grids can be generally classified as homogeneous or heterogeneous.
+    
+\end{itemize}
+
+Several surveys present the definition of Cloud computing as composed of three kind of services ~\cite{survey_3, survey_2, survey_grid}:
+\begin{itemize}
+
+    \item Cloud Software as a Service (SaaS), which cloud providers offer software running on a cloud infrastructure.
+    
+    \item Cloud Platform as a Service (PaaS), which the cloud platform offers an environment for development and deployment of applications.
+    
+    \item Cloud Infrastructure as a Service (IaaS), which cloud providers manage computing resources such as storing and processing capability.
+    
+\end{itemize}
+
+In addition, different deployment models have been adopted based on their variation in physical location, distribution and services, clouds can be classified among :
+\begin{itemize}
+
+    \item Private, which is restricted for management and usage of predefined users. 
+    \item Public or Hosted, which is open to the public, generally usually charged on a pay-per-use. 
+    \item Community, which is available to specific group of people or community in order to share resources and services. 
+    \item Hybrid, which is a combination of the other three types.
+
+\end{itemize}
+
+And so, the applicability of Cloud Computing has been studied. Luiz Bittencourt et.al ~\cite{iot_fog_cloud} depict how the expansion of Internet of Things (IoT), has affecting the way to use Cloud Computing, storing, processing and producing information and knowledge as a result.
+It also discuss how in one hand, the wide adoption of cloud computing is a consequence of a fast time-to-market for many types of applications due to the paradigm’s flexibility and reduced or null initial capital expenditures, on the other hand, this same wide adoption has exposed some limitations of the paradigm in fulfilling all requirements of some classes of applications, such as real-time low latency, and mobile applications.
+And examples, due to the centralized cloud data centers are often physically and/or logically distant from the cloud client, the communication and data transfers traverses multiple hops, which introduces delays and consumes network bandwidth of edge and core networks. As a combination of the ability of run small, localized applications at the edge with the high-capacity from the cloud, it presents the fog computing as emerged paradigm that can support heterogeneous requirements of small and large applications through multiple layers of a computational infrastructure that combines resources from the edge of the network as well as from the cloud.
+
+in addition, Y. {Mao} et.al~\cite{survey_mec} present how Mobile devices tends to growth in terms of usability and processing of data, implicating the decentralization from the Cloud's presence. This survey says that the last decade has seen Cloud Computing emerging as a recent paradigm of computing such that a vision is the centralization of computing, storage and network management in the Clouds, referring to data centers, backbone IP networks and cellular core networks. But, in recent years, it has been changed due to the Clouds being increasingly moving towards the network edges. 
+Y. {Mao} et.al present the estimation that tens of billions of Edge devices will be deployed in the near future, and their processor speeds are growing exponentially, following Moore’s Law. Harvesting the vast amount of the idle computation power and storage space distributed at the network edges can yield sufficient capacities for performing computation-intensive and latency-critical tasks at mobile devices. 
+The same survet presents the Mobile Edge Computing (MEC) as a computation provider at mobile devices considering the proximate access, that is widely agreed to be a key technology for realizing various visions for next-generation Internet, such as Tactile Internet (with millisecond-scale reaction time) and Internet of Things (IoT). Also, Y. {Mao} et.al say : 
+\begin{itemize}
+    
+    \item it shows implications from the different techniques of implementation of MEC, which are network functions virtualization (NFV), information-centric networks (ICN) and software-defined networks (SDN).
+    
+    \item it presents the Fog Computing as a propose of Cisco as a generalized form of MEC where the definition of edge devices gets broader, Fog Computing and Networking are overlapping the terminologies with MEC.
+    
+\end{itemize}
+
+\section{Resource Allocation Techniques and Metrics}
+
+Some of the works referenced in the previous section also present the challenges for resource allocation from the Cloud, Grid and Edge Computing. Hence, in this section will be presented this solutions and techniques.
+
+Huang et.al~\cite{survey_1} affirm that to make appropriate decisions when allocating hardware resources to the tasks and dispatching the computing tasks to resource pool has become the main issue in cloud computing. As cloud computing has its own features, the resource allocation policies and scheduling algorithms for the other computing technologies are unable to work under this conditions. For that reason there is not an uniform standard for job scheduling in cloud and then it is an important component in this context. 
+
+S. M. {Parikh}~\cite{survey_3} points that the management of flexible resources allocation is a problem emerged in this context, due to heterogeneity in hardware capabilities, workload estimation and a variety of services, also as the the maximization of the profit for cloud providers and the minimization of cost for cloud consumers.
+
+According to Hameed Hussain et.al~\cite{survey_2} the resource management mechanism determines the efficiency of the used resources and guarantees the Quality of Service (QoS) provided to the users. Therefore, the resource allocation mechanisms are considered a central theme in HPCs. QoS resource management and scheduling algorithms are capable of optimally assigning resources in ideal situation or near-optimally assigning resources in actual situation, taking into account the task characteristics and QoS requirements. In addition it presents common attributes among the HPC categories, such as size, network type, and coupling.
+
+In Grid platforms as Qureshi, Muhammad Bilal et.al~\cite{survey_grid} present, a Grid resource can be defined as an entity that needs to carry out an operation by an application such that each application in Grid environment competes for various resources according to application needs. This way resource allocation, denoted by RA, mechanisms play an important role in allocating the most appropriate resources to applications. The mechanisms perform the allocation of tasks to the resources in order to ensure QoS to the application according to the user requirements. RA mechanisms provide two basic Grid services: 
+
+\begin{itemize}
+
+    \item Resource monitoring, which regularly monitors resource performance, capability, usage and future reservations, including processors, disks, memories,and channel bandwidths.
+    
+    \item Resource scheduling, which retrieves the information from a) and decides on the allocation of the application to the underlying resources. There are several goals to conduct the RA process as reduce makespan, power minimization and energy efficiency improvement, reduction of task completion time or the amount of data transfer, among others.
+    
+\end{itemize}
+
+For the other side, Feitelson, Dror G.~\cite{job_metrics} says that the root cause for convergence problems is variability in the workloads. Therefore, it characterizes the variability in the runtimes and arrives of workloads observed on different systems, and in models based on them. The first metric dealt with is the response time. It defines “response time” to mean the total wall clock time from the instant at which the job is submitted to the system, until it finishes its run. This can be divided into two components: the running time, denoted by $Tr$, during which the job is actually running in parallel on multiple processing nodes, and the waiting time, denoted by $Tw$ , in which it is waiting to be scheduled or for some event such as I/O. The  waiting time itself can also be used as a metric, based on the assumption that $Tr$ does not depend on the scheduling. Obviously, a lower bound on the response time of a given job is its running time. As the runtimes of jobs have a very large variance, so must the response time.
+It has therefore been suggested that a better metric may be the slowdown (also called “expansion factor”), which is the response time normalized by the running time: $slowdown = (Tw + Tr) / Tr$. 
+Thus if a job takes twice as long to run due to system load, it suffers from a slowdown factor of 2, etc. This is expected to reduce the extreme values associated with very long jobs, because even if a week-long job is delayed for a whole year the slowdown is only a factor of 50. Moreover, slowdown is widely perceived as better matching user expectations that a job’s response time will be proportional to its running time. 
+It affirms that the slowdown metric is that it over-emphasizes the importance of very short jobs. 
+For example, a job taking 100 ms that is delayed for 10 minutes suffers from a slowdown of 6000, whereas a 10-second job delayed by the same 10 minutes has a slowdown of only 60.
+To avoid such effects, Feitelson et al. have suggested the “bounded-slowdown” metric. 
+The difference is that for short jobs, this measures the slowdown relative to some “interactive threshold”, rather than relative to the actual runtime. 
+Denoting this threshold by $τ$ , the definition is $bounded-slowdown = max \{(Tw + Tr) / max\{Tr,τ\} , 1\}$
+
+In addition, the Aida, Kento~\cite{job_size} deals with the investigation of the effect of the job size on the scheduling performances, it characterizes and performs experiments showing how does the processor utilization and the bounded slowdown are affected in that context. In details, the processor utilization is the percentage that processors are busy over entire simulation. The slowdown ratio (SR), shows normalized data for mean response time, and it is derived by the following formula. For instance, Aida, Kento supposes that 10000 jobs were executed in an experiment. The mean response time of these 10000 jobs was 5 hours, and their mean execution time on processors was 2 hours. Then, the slowdown ratio is 2.5.
+Instead other many previous performance evaluation works that assumed that characteristics of parallel jobs, or a parallel workload, followed a simple mathematical model, Aida, Kento follows recent analysis of real workload logs, which are collected from many large-scale parallel computers in production use, shows that a real parallel workload has more complicated characteristics.%:
+
+\begin{comment}
+
+
+\begin{itemize}
+
+    \item  A percentage of small jobs, which request a small number of processors, is higher than that of large jobs, which request a large number of processors.
+    \item  A percentage of jobs that request power-of-two processors is high.
+    \item  A percentage of jobs that request square of n processors is high.
+    \item  A percentage of jobs that request multiples of 10 processors is high.
+    
+\end{itemize}
+
+Applied into the following workload models to be evaluated, where each model is distinguished from others by the following distributions of job size:
+\begin{itemize}
+    
+    \item Uniform model, where the job size is an integer that follows the Uniform distribution within the range [1,m]. 
+    
+    \item Harmonic model, where the job size is an integer that follows the Harmonic distribution within the range [1,m]. The probability that jobsiz = n is proportional to 1=n 1 : 5 . This model represents the job size characteristic (1) in the above.
+    
+    \item Power2 model, where the job size is an integer that is calculated by 2 k within the range [1,m]. (k is an integer.) The probability of each value is uniform. This model represents the job size characteristic (2).
+    
+    \item Square model, where the job size is an integer that is calculated by k 2 within the range [1,m]. (k is an integer.) The probability of each value is uniform. This model represents the job size characteristic (3)
+    
+    \item Multi10 model, where the job size is an integer that is calculated by 10 1 k within the range [1,m]. (k is an integer.) The probability of each value is uniform. This model represents the job size characteristic (4).
+
+\end{itemize}
+\end{comment}
+\section{Applicability, Load Balance, Energy Consumption Reduction and Other}
+
+Different techniques for several goals have been applied in the context of Cloud and Edge Computing. The usage of containers is one technique presented by C. {Pahl} and B. {Lee}~\cite{containers} that introduce the Cloud computing as a centralized, large-scale data centres to a more distributed multi-cloud setting comprised of a network of larger and smaller virtualized infrastructure runtime nodes, also referred to as edge clouds, edge computing or fog computing. It is focused on the virtualization as a form to reach the network and allow Internet-of Things (IoT) infrastructures to be integrated. As a challenge resulting from distribution, it affirms the necessity of more lightweight solutions than the current virtual machine (VM)-based virtualisation technology. Virtual machines (VMs) have been at the core of the compute infrastructure layer providing virtualized operating systems. It investigates containers, which are a lightweight virtualisation concept, i.e., less resource and time consuming. VMs and containers are both virtualisation techniques, but solve different problems. Containers are a solution for more interoperable application packaging in the cloud and should therefore address the PaaS concerns.
+
+Load balancing algorithm is another example, M. {Randles} et.al~\cite{load_balance} identify it as major concern to allow Cloud computing to scale up to increasing demands. It presents three potentially viable methods for load balancing in large scale Cloud systems. The first one is a nature-inspired algorithm may be used for self-organization, achieving global load balancing via local server actions. The second one by a self-organization that can be engineered based on random sampling of the system domain, giving a balanced load across all system nodes. The third one, by a restructure to optimize job assignment at the servers. 
+
+Since the execution of HPC jobs produce a huge energy consumption, one other target that has been studied is how to reduce this energy consumption. Jie Meng et.al ~\cite{simulation_optimization} presents that has been reported the worldwide data center electricity consumption increased by 56\% from 2005 to 2010, which accounted for 1.3\% of the total electricity use. A recent review shows that for every dollar spent on power of data center computing equipments, another dollar is spent on data center cooling infrastructures, which translates to an energy cost reaching up to millions of dollars and cooling costs reaching close to half of the overall energy cost. Thus, it manages simulations in order to study cooling and energy efficiency in this context.
+
+The Batsim/ SimGrid toolkit also includes a plugin to keep track of temperature for similar reasons~\cite{cooling_energy_simgrid, energy_mpi_simgrid}.
+These papers show how the energy is modeled and how it could be used to achieve such target, which will be discussed a lit bit more in next sections.
+
+in addition, the Qarnot Computing proposal is direct related with this context, which will discussed in the next sections, but could be find detailed information in the paper ~\cite{Qarnot2018}
+
+\section{Motivation, Companies Usage and Recent Statistics}
+
+The work ~\cite{emergency_edge} presents in details how Cloud computing has been used and how it has been requiring Edge computing as a recent paradigm. It takes in account the aspect and impact commercial from these computing platforms providing a very good panoramic view of the context, it affirms that nascent technologies and applications for mobile computing and the Internet of Things (IoT) are driving computing toward dispersion. For them Edge computing is a recent paradigm in which substantial computing and storage resources—variously referred to as cloudlets, micro datacenters, or fog nodes are placed at the Internet’s edge in close proximity to mobile devices or sensors.
+It shows that industry investment and research interest in edge computing have grown dramatically in recent years. Nokia and IBM jointly introduced the Radio Applications Cloud Server (RACS), an edge computing platform for 4G/LTE networks, in early 2013. It affirms that the following year, a mobile edge computing standardization effort began under the auspices of the European Telecommunications Standards Institute (ETSI). The Open Edge Computing initiative (OEC; openedgecomputing.org) was launched in June 2015 by Vodafone, Intel, and Huawei in partnership with Carnegie Mellon University (CMU) and expanded a year later to include Verizon, Deutsche Telekom, T-Mobile, Nokia, and Crown Castle. This collaboration includes creation of a Living Edge Lab in Pittsburgh, Pennsylvania, to gain hands-on experience with a live deployment of proof-of-concept cloudlet-based applications. Organized by the telecom industry, the first Mobile Edge Computing Congress (tmt.knect365.com/mobile-edge-computing) convened in London in September 2015 and again in Munich a year later. The Open Fog Consortium (www.openfogconsortium.org) was created by Cisco, Microsoft, Intel, Dell, and ARM in partnership with Princeton University in November 2015, and has since expanded to include many other companies. The First IEEE/ ACM Symposium on Edge Computing (conferences.computer.org/SEC) was held in October 2016 in Washington, DC.
+
+Is possible to find examples of software as a service (SaaS) instances, such as Google Apps, Twitter, Facebook, and Flickr, have been widely used in our daily life ~\cite{vision_challenges_edge}, ~\cite{promise_edge}. Moreover, scalable infrastructures as well as processing engines developed to support cloud service are also significantly influencing the way of running business, for instance, Google File System, MapReduce, Apache Hadoop, Apache Spark, and so on. In addition, it affirms with recent statistics that with IoT, we will arrive in the post-cloud era, where there will be a large quality of data generated by things that are immersed in our daily life, and a lot of applications will also be deployed at the edge to consume these data. By 2019, data produced by people, machines, and things will reach 500 zettabytes, as estimated by Cisco Global Cloud Index, however, the global data center IP traffic will only reach 10.4 zettabytes by that time. By 2019, 45\% of IoT-created data will be stored, processed, analyzed, and acted upon close to, or at the edge of, the network. Finally, they raise the following issues: \textit{Why Do We Need Edge Computing ?}
+
+\begin{itemize}
+    
+    \item Push from Cloud services: putting all the computing tasks on the cloud has been proved to be an efficient way for data processing since the computing power on the cloud outclasses the capability of the things at the edge. However, compared to the fast developing data processing speed, the bandwidth of the network has come to a standstill. With the growing quantity of data generated at the edge, speed of data transportation is becoming the bottleneck for the cloud-based computing paradigm. It examples, about 5 Gigabyte data will be generated by a Boeing 787 every second, but the bandwidth between the airplane and either satellite or base station on the ground is not large enough for data transmission. It considers an autonomous vehicle as another example, one Gigabyte data will be generated by the car every second and it requires real-time processing for the vehicle to make correct decisions. If all the data needs to be sent to the cloud for processing, the response time would be too long. Not to mention that current network bandwidth and reliability would be challenged for its capability of supporting a large number of vehicles in one area. In  this case, the data needs to be processed at the edge for shorter response time.
+    
+    \item Pull From IoT: almost all kinds of electrical devices will become part of IoT, and they will play the role of data producers as well as consumers, such as air quality sensors, LED bars, streetlights and even an Internet-connected microwave oven. It is safe to infer that the number of things at the edge of the network will develop to more than billions in a few years. Thus, raw data produced by them will be enormous, making conventional cloud  computing not efficient enough to handle all these data. This means most of the data produced by IoT will never be transmitted to the cloud, instead it will be consumed at the edge of the network.
+    
+    \item Change from data consumer to producer: in the cloud computing paradigm, the end devices at the edge usually play as data consumer, for example, watching a YouTube video on your smart phone. However, people are also producing data nowadays from their mobile devices. The change from data consumer to data producer/consumer requires more function placement at the edge. For example, it is very normal that people today take photos or do video recording then share the data through a cloud service such as YouTube, Facebook, Twitter, or Instagram. Moreover, every single minute, YouTube users upload 72 h of new video content; Facebook users share nearly 2.5 million pieces of content; Twitter users tweet nearly 300 000 times; Instagram users post nearly 220 000 new photos. However, the image or video clip could be fairly large and it would occupy a lot of bandwidth for uploading. In this case, the video clip should be demised and adjusted to suitable resolution at the edge before uploading to cloud. Another example would be wearable health devices. Since the physical data collected by the things at the edge of the net- work is usually private, processing the data at the edge could protect user privacy better than uploading raw data to cloud.
+
+\end{itemize}
+
+Also, \textit{what are the benefits of Edge Computing?}
+\begin{itemize}
+    \item In edge computing we want to put the computing at the proximity of data sources. This have several benefits com- pared to traditional cloud-based computing paradigm. Here we use several early results from the community to demonstrate the potential benefits. Researchers built a proof-of-concept platform to run face recognition application in, and the response time is reduced from 900 to 169 ms by moving com- putation from cloud to the edge. Moreover, the energy consumption could also be reduced by 30\%–40\% by cloudlet offload- ing. clonecloud in combine partitioning, migration with merging, and on-demand instantiation of partitioning between mobile and the cloud, and their prototype could reduce 20× running time and energy for tested applications.
+\end{itemize}
+
+%***** Volunteer computing 
+
+%Their utilization on Volunteer Computing platforms has been aimed by studies as [An Efficient Algorithm for Scheduling Jobs in Volunteer Computing platforms] which considers that the increased number of processors involved in the new computing platforms and the complexity of the underlying architecture have made the job scheduling management an always more difficult task. It treats 
+
+
+\section{Related Simulation Tools}
+
+We described in this thesis a novel simulation tool for easily designing and testing scheduling strategies on edge computing platforms.
+It was motivated the huge effort of building a new simulator using adequate tools for modeling the processing and memory units and the network topology.
+
+We discussed briefly below the main competitors and argument for this simulator. 
+Some simulators have constraints that would prevent us to correctly simulate a platform such as the \emph{Qarnot}'s one.
+For example, EmuFog\cite{emufog} does not support hierarchical fog infrastructures, whereas \emph{Qarnot} infrastructure is inherently hierarchical. 
+Other simulators such as iFogSim\cite{ifogsim},  EdgeCloudSim\cite{edgecloudsim} and IOTsim\cite{iotsim}, are simulation frameworks that enable to simulate fog computing infrastructures and execute simulated applications on top of it.
+The two closest simulators to the presented one is a) the CloudSim, widely used to validate algorithms and applications in different scientific publications, howerver is based on a top-down viewpoint of cloud environments. 
+And b) this one related to other very close work on the literature ~\cite{simulation_optimization} where are implemented evaluation models and allocation optimization methods in SST, the Structural Simulation Toolkit. The SST is an architectural simulation framework designed to assist in the design, evaluation, and optimization of HPC architectures and applications. It is developed by Sandia National Laboratories to evaluate the performance of computer systems ranging from small-scale single-chip processors to large-scale parallel computing architectures. It was used for evaluating an optimization algorithm managing real-world parallel workloads, as well as the implementations of job scheduler and allocation algorithms in SST.
+
+That is, to the best of our knowledge, there are no articles that properly validate the different models it relies on. 
+On the contrary, the presented one is built on top of SimGrid, which has been validated in many publications~\cite{simgrid_publis} and allows finer-grained simulations, as explained in~\Cref{ssec:operational_components}.

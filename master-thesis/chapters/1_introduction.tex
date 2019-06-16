@@ -1,0 +1,48 @@
+\chapter{Introduction}
+\label{sec:intro}
+
+\section{Edge Computing and the Internet of Things}
+
+The proliferation of Internet of Things (IoT) applications~\cite{atzori2010internet}, as well as the advent of new technologies such as
+Mobile Edge computing~\cite{7727082}, and Network Function Virtualization~\cite{mijumbi2015network} (NFV) have been accelerating the deployment of Cloud Computing like capabilities at the edge of the Internet. Cloud computing has been targeted of centralized computation, where in general, the data is sent to the Cloud, computed there and the delivered to one that requested it. However, nowadays, mobile devices have considerable computation power embedded, hence, the usage of these for one hand has requested the delivery of processed information from the Cloud as soon as possible, and for the other hand, it has computed its own computation and then get available for more data processing much faster than previously. So, a paradigm has been growth in the aspect of data processing, storage and transfer, which is the one to utilize these devices between the users and the Cloud to perform all these computations~\cite{iot_fog_cloud}.
+Referred to as the Fog~\cite{DBLP:conf/sigcomm/BonomiMZA12} or the Edge computing~\cite{shi2016} paradigms, the main objective is to perform on demand computations close to the place where the data are produced and analyzed in order to mitigate data exchanges and to avoid too high latency penalties~\cite{zhang2015cloud}.
+
+Among the open questions, our community should address to favor the adoption of such infrastructures is the computation/data placement problem \ie \textit{where to transfer data sets according to their sources and schedule computations to satisfy specific criteria}.
+Although several works have been dealing with this question~\cite{Yousefpour17,Brogi17b,Skarlat17a,Xia18,Naas17,Donassolo18, aitsalaht:hal-02108806}, it is difficult to understand how each proposal behaves in a different context and with respect to different objectives (scalability, reactivity, etc.).
+In addition to having been designed for specific use cases, they have been evaluated either using \textit{ad hoc} simulators or in limited \textit{in vivo} (i.e., real world) experiments.
+These methods are not accurate and not representative enough to, first, ensure their correctness on real platforms and, second, perform fair comparisons between them. In addition to the resource heterogeneity, network specifics as (latency, throughput, etc.) and workloads, Fog/Edge computing infrastructures differ from Cloud Computing platforms because of the uncertainties: connectivity between resources is intermittent and storage/computation resources can join or leave the infrastructure at any time, for an unpredictable duration. Hence, is necessary a tool to provide a structured Edge platform to allow studies.
+
+\section{An Edge Simulated Platform}
+
+Similarly to what has been proposed for the Cloud Computing paradigm~\cite{vmplaces:tpds}, a dedicated simulator toolkit to help researchers investigate HPC scheduling strategies have been developed, Batsim ~\cite{batsim}. Utilizing its decision maker component, as our goal, many scheduling policies have been developed to then be compared in terms of performance when applied in a use case. In particular, Batsim also provides an external module to inject any type of event that could occur during the simulation (e.g., a machine became unavailable at time $t$) and a Storage Controller, to supervise all transfers of data sets within the simulated platform. Also, there is a scientific instrument to study the behavior of large scale distributed systems such as Grids, Clouds, HPC or P2P systems, Simgrid ~\cite{simgrid}. It can be used to evaluate heuristics, prototype applications or even assess legacy MPI applications.
+
+In this thesis we will present the Batsim/Simgrid toolkit that provide several extensions that make possible the construction of an Edge simulated platform and also its performance analyses. Hence, as we applied different policies into a use case, researchers can use it to study whether scheduling algorithms that have been proposed two decades ago in desktop computing platforms, volunteer computing and computational grids~\cite{anderson2004boinc, allcock2002data, volunteer_computing} reviewing to cope with edge specifics.
+While edge workloads differ from best effort jobs \footnote{Jobs managed under a best effort network, meaning that they obtain unspecified variable bit rate and latency and packet loss, depending on the current traffic load}, desktop/volunteer computing and computational grids have several characteristics that are common to Fog/ Edge platforms.
+
+
+\section{Case Study}
+
+Although the validation of these extensions, as well as the integration of representative edge workloads is still on going, the first building blocks implemented enabled the study of an edge infrastructure as complex as the \emph{Qarnot Computing} platform~\cite{qarnot_web}. The \emph{Qarnot Computing} infrastructure is a production platform composed of 3,000 diskless machines distributed across several locations in France and Europe. Each computing resource can be used remotely as traditional Cloud computing capabilities or locally in order to satisfy data processing requirements of IoT devices that have been deployed in the vicinity of the computing resource. As such, the \emph{Qarnot} platform is a good example of an Edge infrastructure, with computing units and mixed local/global job submissions with data sets dependencies. As far the simulation of the Qarnot platform was possible utilizing Batsim/SimGrid, it also provided us the possibility to apply different scheduling policies to the Qarnot's jobs.
+
+\section{Main Contributions}
+
+This thesis contributed with the schedulers that were developed. For that we connected all the current extensions that have been developed, including, the Storage Controller and the logs extractor.
+To compare different scheduling policies from different points of view, this thesis contributed with the design of experiments that allow the easy modification, execution and visualization of all results provided by the platform.
+These analyses was conducted by the study of the job's processing time distribution, the job's dependencies of data sets, the comparison among the workloads extracted and among the developed policies by several metrics. In addition, beyond the metrics provided by Batsim/Simgrid as waiting time, scheduling time and slowdown this work contributed with the addition of a classical metrics utilized in the literature: bounded slowdown. 
+
+Furthermore, this thesis contributed to the simulation of the whole Qarnot platform. In order to present details of its implementation, we will depict the whole platform giving an overview of the Edge placement simulator. After presenting the simulated platform built with Batsim/Simgrid, we will describe how the \emph{Qarnot} infrastructure has been instantiated on top of it, how the injector was used to simulate the \emph{Qarnot} workload and, finally, how was developed and evaluated different scheduling strategies for job placement and data movements.
+
+With that results and all extensions connected as different components, a paper was submitted to the IEEE MASCOTS 2019 conference presenting this Edge Platform Simulator~\cite{placement-challenges}.
+In addition, one can find the whole experimental structure of this project in the \textit{uga-master-thesis} repository on GitHub \footnote{https://github.com/andersonandrei/uga-master-thesis}, there are more figures and all scripts utilized for experiments.
+
+\section{Outline}
+
+The rest of the thesis is structured as follows.
+~\Cref{sec:related} presents related works.
+~\Cref{sec:simulation} gives an overview of the Bastim/SimGrid toolkit and the extensions utilized. 
+~\Cref{sec:platform} presents the \emph{Qarnot Computing} use case.
+~\Cref{sec:simulated_platform} describes how we simulated the use case.
+~\Cref{sec:schedulers} presents concepts about job allocation and metrics to evaluate performance in the context of this thesis. Also depicts the algorithms developed based on the use case and its differences.
+~\Cref{sec:experiments} discusses analyses of the different scheduling strategies for the \emph{Qarnot} platform.
+We also show investigations regarding jobs processing time and the data sets dependencies based on the simulation and the extracted logs. 
+Concluding and future remarks are presented in~\Cref{sec:conclusion}.

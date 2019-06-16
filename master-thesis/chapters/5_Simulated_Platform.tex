@@ -1,0 +1,138 @@
+\chapter{Simulated Platform}
+\label{sec:simulated_platform}
+
+In this section is presented  how was modeled the \emph{Qarnot} platform and is explained how it was instantiated the inputs that were required for the simulation. Then, it is described the content of the files given as input of the simulation and how they are generated.
+
+\section{Qarnot to Batsim/SimGrid Abstractions}
+
+\Cref{fig:PlatformTranslation} depicts the real and the simulated platforms.
+Each QMobo of the platform is simulated as a SimGrid host as they are the only computing units of the platform. QMobos belonging to the same QRad are aggregated in the same SimGrid zone, as well as QRads of the same QBox, and all QBoxes of the QNode.
+The management of storage spaces is done by adding special hosts that handle the \emph{storage} role. Thus, in each QBox zone there is one additional storage host for the QBox disk. Similary, there is one storage host in the QNode zone to represent the CEPH.
+For the computing requests, each instance of a given QTask can run independently of the others, so we transcribed each instance as one Batsim job, with the same data-set dependencies and submission time for jobs belonging to the same QTask.
+Regarding the heating requests, each change of the target temperature of a QRad is simulated as an external event injected in the simulation, as well as when a QRad was turned off for being too warm.
+
+\begin{figure} [h] %[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/platform-translation.png}
+    \caption{Comparison between the real and simulated \emph{Qarnot} platform.}
+    \label{fig:PlatformTranslation}
+\end{figure}
+
+\section{Workflow}
+
+In order to simulate the behavior presented in \Cref{sec:qarnot} the schedulers of the QNode- and QBox-level (including the Frequency Regulator) were implemented in Python and both live in the same process, along with the Storage Controller. Through the platform translation as \Cref{fig:PlatformTranslation}, the Qarnot platform has been simulated as \Cref{fig:SimulatedPlatform}.This one illustrates in detail how the abstraction between the Qarnot and the simulated platform is performed, where is possible to see fewer components for the same workflow since Batsim is in charge of all physical and execution process.
+    
+The simulated platform considers 3 main classes: the QNodeSched, QBoxSched and StorageController. Each one can communicate with the Batsim process delivering or receiving information by messages.
+
+\begin{figure} [h] %[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/simulated-platform.png}
+    \caption{Simulated platform on SimGrid/ Batsim.}
+    \label{fig:SimulatedPlatform}
+\end{figure}
+
+\\
+We illustrate the simulated platform workflow in~\Cref{fig:SimulatedPlatform}. First, Batsim receives as input and loads the events, platform, workload and the data sets description (steps 01 and 02). Then, the QNodeSched will be notified to take some decision (step 03).
+First, it should know which resources are available. For that, every 30 seconds (defined as default), the QNodeSched ask information about the state of the disk, QRads and QMobos of the QBoxes (steps 03 and 04), in particular, the number of QMobos available for computation and the free storage space are reported.
+
+A first scheduling process is made at the QNode-level to dispatch instances of the QTasks to the QBoxes (steps 05 and 06). The QNode tries to dispatch, for each QTask taken by priority, as many instances as possible onto QBoxes, with respect to the number of available QMobos and storage space left on the QBox disks.
+
+Upon receiving instances of a QTask, the QBox will reserve for each instance a QMobo from the warmest QRad for the case of low priority QTask, and a QMobo from the coolest QRad in the case of high priority (step 08).
+This distinction is made to keep more QMobos available in case high priority QTasks are sent to the QBox in the near future. The QBox then checks whether the Docker image and other data dependencies for these instances are on disk and fetches any missing data from the CEPH (steps 08 and 09).
+
+Once all data transfers are completed for this QTask, the QBoxSched will be informed by the StorageController and then will allow Batsim to simulate the instance execution, which will notify the QNodeSched whenever the instance completes (steps 11 through 14). 
+
+Finally, the queue of QTasks is updated and if an instance of the same QTask can be directly dispatched, it is sent to the QBox and the execution starts immediately, without rebooting the QMobo (steps 15 through 16).
+
+\section{Extracting Qarnot Traces}
+\label{secsec:traces}
+
+A log extractor was built to generate all the input files to feed Batsim and the decision process from real logs of the \emph{Qarnot} platform, for a given time period.
+These files describe the platform, the workloads and their data-dependencies, the list of data-sets and all events that are mandatory to simulate the \emph{Qarnot} system.
+
+%While we had to build a specific extractor to gather and format information from the \emph{Qarnot} logs, generated files are generic with respect to Batsim/SimGrid interfaces.
+%In this sense, one could easily consider simulating another platform by taking our extractor as an example and adapt it to its needs.
+
+\subsection{Platform Description}
+
+%The definition of the platform is an XML file readable by SimGrid.
+%The file describes the whole platform to simulate, with in details:
+%A list of QBoxes with for each: the id, the network bandwidth and latency to the CEPH and to its QBoxes, the storage disk host and its size, the localization and a list of QRads.
+%For each QRad: the id and a list of QMobos.
+%For each QMobo represented by a SimGrid host: the id, the list of speeds and corresponding power usage, and the coefficients required for the temperature plug-in.
+
+The definition of the platform is an XML file readable by SimGrid.
+The file describes the whole platform to simulate, within details: \\
+
+A list of QBoxes with for each: 
+\begin{itemize}
+    \item The id, 
+    \item The network bandwidth and latency to the CEPH and to its QBoxes, 
+    \item The storage disk host and its size, 
+    \item The localization,
+    \item A list of QRads with for each: 
+    \begin{itemize}
+        \item The id 
+        \item A list of QMobos with for each: 
+        \begin{itemize}
+            \item The id, 
+            \item The list of speeds and corresponding power usage, 
+            \item The coefficients required for the temperature plug-in.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Workload Description} % from the Batsim description
+\label{subsec:workload}
+
+The workload is represented by a JSON file containing a list of job descriptions and a list of profile descriptions.
+
+Job descriptions are defined by the user requests and contain: 
+\begin{itemize}
+    \item The id, 
+    \item The submission time,
+    \item The job profile to use.
+\end{itemize}
+
+Profile descriptions represent how a job should be simulated, plus other specific information, and contain: 
+\begin{itemize}
+    \item The type of job to simulate, 
+    \item The number of flops to compute, 
+    \item The job priority, 
+    \item The list of data-sets required as inputs.
+\end{itemize}
+    
+In addition, each \emph{Qarnot} instance is represented by a Batsim job with a specific job profile and requiring a single computing resource. Also, each job extracted provides the following information, not used by Batsim, but useful for some analysis that will be presented in further sections:
+
+\begin{itemize}
+    \item The time when the job was started in the real platform,
+    \item The time when the job finished in the real platform,
+    \item The id of the real resource where the QTask was executed,
+    \item The speed of execution from the real platform.
+\end{itemize}{}
+
+\subsection{Data Sets Description} 
+
+The list of data-sets is also described as a list of JSON objects, with one per line in the file is read by the \emph{decision process} and fed to the Storage Controller. Each data-set object is represented by two fields:
+
+\begin{itemize}
+    \item The id
+    \item The size in bytes of the data-set.
+\end{itemize}{}
+
+%This list of data-sets is read by the Storage Controller upon initialization of the schedulers and the storage representing the CEPH is filled accordingly.
+
+\subsection{External Events Description}
+As discussed in ~\Cref{sssec:external-events}, each event is timestamped and is described as a JSON object:
+\begin{itemize}
+    \item $qrad\_set\_target\_temperature$: containing the id of the QRad and its new target temperature. This event informs the associated QBox that the temperature target of a QRad has changed.
+    \item $machine\_available$ and $machine\_unavailable$: containing a list of resources impacted by this event.
+    \item $site\_set\_outside\_temperature$: containing the location and its new outside temperature. This event is directly forwarded to the temperature plug-in(see ~\Cref{sssec:plugins}).
+\end{itemize}
+
+%We also added the handling of the \emph{site\_set\_outside\_temperature} event.
+%This event informs the associated group of QBoxes that the outside air temperature has changed and is directly forwarded to SimGrid to update the information of the temperature plugin.
+
+In addition there is a \emph{stop\_simulation} event to ask the scheduler to kill all executing jobs and reject waiting jobs to strictly stop the simulation after a given time. It is useful if one intends to simulate a specific period of time, for example, the behavior of a platform for one week.
+
+

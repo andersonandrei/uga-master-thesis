@@ -1,0 +1,302 @@
+\chapter{Job Allocation}
+\label{sec:schedulers}
+
+As presented in \Cref{sec:related}, the HPC job allocation problem has been studied since a long time ago, and the main idea is to fit, by some convenient metric, HPC jobs to be executed as soon as possible onto resources. The metrics and weights taken into account for the decision processes could change as the proposals of the system, but in general, from a queue of jobs, allocation decisions among resources should be taken. 
+
+As the goal of this thesis, several scheduling policies were implemented in order to compare their performances. In this section will be described the challenges present in its use-case and all algorithms for the implemented policies.
+
+\section{Scheduling Challenges}
+
+Was described in \Cref{sec:qarnot} the Qarnot proposal, which is naturally a multi-objective problem, because there are at least three viewpoints, the first one from customers that want to compute (HPC customers), the second one from customers that want to be heated (host) and the third one from the middleware.
+
+The viewpoint of the HPC customers is what is found in classical distributed scheduling systems: the goal is to get the results of submitted jobs as soon as possible. The viewpoint of the hosts completely differs from what is found in classical scheduling theory since the Qarnot foundation. Finally, the middleware viewpoint is specifically related to a goal of the Qarnot computing business model, which is the one of reducing the energy consumption in the processing of the jobs, related to the Qarnot business model since the company re-funds the electricity bill of the hosts. 
+
+%The Q.ware scheduling model also introduces two types of constraints related to heat production.The first is on the velocity and the second type is to ensure that the heat diffused by any heater fits within a given interval.
+
+Following the Q.Ware infrastructure, the decision processes are taken in two-levels, through the QNodes and the QBoxes. The scheduling at QNode-level can be viewed as an assignment step. The idea is to dispatch in priority tasks to QBoxes having QRads which need to heat the most.
+%, while also trying to prioritize QBoxes which already have in storage the data sets required by a task, to minimize the data movements. 
+The scheduling at the QBox-level is in charge to select the best QRad based on its QMobos, also download the required data-sets and report periodically the status of its resources.
+
+From a QNode point of view, the notion of temperature and heating needs is unknown and hidden behind other information sent periodically by the QBoxes, as detailed below. Upon the arrival of a task, the QNode knows the following information:
+\begin{itemize}
+    \item The number $n$ of instances composing the task.
+    \item The priority $w$ of the task.
+    \item The list of data sets $\{D_1 \cdots D_k \}$ which the task depends on.
+\end{itemize}
+
+The priorities are defined as high, low and background, such that QTasks with high priority can preempt low and background others, QTasks with low priority can preempt background others and QTasks with background priority can not preempt any other. This last one is not a real HPC or IoT job submitted on the platform. Named $burn\_job$, this Qtask is a fake job created locally when some user requires heating and there are no jobs to be sent to that QRad. This way, this job is useful just to provide heating, been possible to be preempted anytime whenever a real job arrives on that QRad.
+
+Moreover, from periodic reports from the QBoxes, the QNode knows the number of available QRads for each type of priority, which is critical to achieving a good quality of service regarding the priority of the tasks.
+For example, if there are not enough available QRads to start a high priority task, some lower priority tasks being executed must be preempted to free resources for that high priority task.
+Hence is necessary to have different values for the available QRads, one for each different class of task priority.
+
+The last source of information to help the QNode dispatch tasks to QBoxes is provided by the storage controller, which is in charge of managing the data sets available in the centralized storage and the QBox disks, as well as their movements.
+It provides the list of QBoxes already having the data sets required by that task.
+\begin{comment}
+        
+
+\Cref{alg:StandardSched}, \Cref{alg:LocalityBasedSched}, \Cref{alg:FullReplicateSched}, \Cref{alg:3ReplicateSched} and \Cref{alg:10ReplicateSched} 
+\end{comment}
+This way, the Algorithm 1, 2, 3, 4, 5 and 6 were developed.
+
+\section{Standard Schedulers}
+
+The standard scheduler for both levels was based on the current Qarnot QNodes and QBoxes policies.
+
+\subsection{QNode Scheduler}
+
+The QNode scheduler is in charge of manage the queue of QTasks and dispatch to the QBoxes that require heating, taking into account the priority of the QTasks.
+It is the central decision maker and has a global view of the process, receiving information about the available resources from the QBoxes and QTasks from submissions of HPC jobs or from IoT devices. This scheduler was implemented as ~\Cref{alg:StandardSched}.
+
+\begin{algorithm} %[H]
+    \caption{QNode scheduler: dispatching instances onto QBoxes - Standard version}
+    \label{alg:StandardSched}
+        \begin{algorithmic}[1]
+            \STATE $available\_mobos\_list \leftarrow$ List of available QMobos among all QBoxes
+            \STATE $qtask\_queue \leftarrow$ The list of QTasks to be dispatched
+            \IF{$qtask\_queue \eq \emptyset$}
+                \STATE return
+            \ELSE
+                % TODO{To explain $nb\_of\_running\_instances$}
+                \STATE Sort the $qtask\_queue$ by 1) decreasing $priority$; 2) increasing $nb\_of\_running\_instances$
+                \FOR{$qtask \in$ $qtask\_queue$}
+                	\STATE $nb\_instances\_left \leftarrow$ Number of instances of $qtask$ waiting to be dispatched
+                    \IF {$nb\_instances\_left$ > 0}
+                        \STATE $mobos\_list \leftarrow$ List of QMobos from $available\_mobos\_list$ with BKGD priority
+                        \STATE Dispatch as many instances as possible on QMobos from $mobos\_list$
+                        \IF {{$nb\_instances\_left$ > 0} \AND {$qtask.priority\_group$ > BKGD}}
+                            \STATE \# There are more instances to dispatch and the qtask is either LOW or HIGH priority.
+                            \STATE $mobos\_list \leftarrow$ List of QMobos from $available\_mobos\_list$ with LOW priority
+                            \STATE Dispatch as many instances as possible on QMobos from $mobos\_list$
+                            \IF {{$nb\_instances\_left$ > 0} \AND {$qtask.priority\_group$ > LOW}}
+                                \STATE \# There are more instances to dispatch and the qtask has HIGH priority.
+                                \STATE $mobos\_list \leftarrow$ List of QMobos from $available\_mobos\_list$ with HIGH priority
+                                \STATE Dispatch as many instances as possible on QMobos from $mobos\_list$
+                            \ENDIF
+                        \ENDIF
+                    \ENDIF
+                \ENDFOR
+            \ENDIF
+        \end{algorithmic}
+\end{algorithm}
+
+\subsection{QBox Scheduler}
+
+The QBox scheduler is in charge to require the data sets to the Storage Controller, dispatch jobs to the QRads and start the execution of the QTasks in the QMobos whenever the data sets are ready.
+
+\Cref{alg:BoxSched} aims to execute an instance of high priority on the coolest QRad available for that, if possible without preempting low instance.
+Execute an instance with background/low priority on the warmest QRad available for that.
+
+\begin{algorithm}[H]
+    \caption{QBox scheduler: dispatching instances onto QRads}
+    \label{alg:BoxSched}
+        \begin{algorithmic}[1]
+        %\STATE First take tasks by priority order
+        %\STATE For each task:
+        %\STATE ask for the data-sets to be on disk. (Maybe it is already, but don't care: say that in the text)
+        %\STATE Make reservations for as muchi nstances as possible of that qtask on qmobos
+        %\STATE if you cannot reserve for all isntances, reject the ones that don't have reservations
+        %\STATE When data-sets are all on disk, start the instances on the reserved mobos
+        %\STATE end loop for all tasks
+
+\begin{comment}
+
+        \STATE $waiting\_instances \leftarrow$ List of instances waiting to be scheduled on this QBox, sorted by priority
+        \FOR{$qtask \in$ $waiting\_instances$}
+            \STATE Ask for the transfer of data-sets from the $CEPH$ to the $QBox$ disk. 
+            \STATE Make reservations for as much instances as possible of the $qtask$ on $Qmobos$
+            
+            \STATE Reject the instances that did not get a reservation
+            
+            \STATE $Upon$ data-sets are all on disk, start the instances on the reserved $Qmobos$
+        \ENDFOR 
+\end{comment}       
+
+        \STATE $waiting\_instances \leftarrow$ List of instances waiting to be scheduled on this QBox, sorted by priority
+        \FOR{$qtask \in$ $waiting\_instances$}
+            \STATE Ask for the transfer of data-sets from the $CEPH$ to the $QBox$ disk. 
+            \IF{$qtask.priority$ \eq HIGH}
+                    \STATE \# Find coolest QRad which is not running LOW instance
+                    \STATE $qmobo\_list \leftarrow$ List of QMobos which is possible to run HIGH priority Qtasks
+                    \STATE $qrad\_list \leftarrow$ List of QRads by decreasing temperature
+                    \STATE Run as many instances as possible in $Qmobos \in$ $qmobos\_list$ which are from $Qrads \in$ $qrad\_list$
+
+                \ELSE
+                    \STATE \# Find warmest QRad among the availLow and availBkgd
+                    \STATE $qmobo\_list \leftarrow$ List of QMobos which is possible to run LOW priority Qtasks
+                    \STATE $qrad\_list \leftarrow$ List of QRads by decreasing temperature
+                    \STATE Run as many instances as possible in $Qmobos \in$ $qmobos\_list$ which are from $Qrads \in$ $qrad\_list$
+                \ENDIF
+        \ENDFOR
+        \IF{$waiting\_instances \neq$ 0}
+            \STATE \# Some $qtaks$ could not be executed.
+            \STATE Reject the $waiting\_instances$ to the QNode Scheduler
+        \ENDIF
+
+        %\STATE Check if there are data sets transfers in progress.
+\begin{comment}
+        \STATE $waiting\_instances \leftarrow$ List of instances waiting to be scheduled on this QBox, sorted by priority
+        \FOR{$qtask \in$ $waiting\_instances$}
+            \STATE $nb\_qtask\_instances \leftarrow$ Number of instances from this $qtask$
+            \STATE Transfer the $qtask.data\_sets$
+            \IF{$qtask.priority \eq$ HIGH}
+                \STATE \# Find coolest QRad which is not running LOW instance
+                \STATE $qmobo\_list \leftarrow$ List of QMobos which is possible to run HIGH priority Qtasks
+                \STATE $qrad\_list \leftarrow$ List of QRads by decreasing temperature
+                \FOR{$qrad \in$ $qrad\_list$}
+                    \FOR{$qmobo \in$ $qmobo\_list$}
+                        \IF{$qmobo.running\_job\_priority \eq$ BKGD}
+                            \STATE Start the instance in this $qmobo$
+                            \STATE Update $nb\_qtask\_instances$
+                            \IF{$nb\_waiting\_instances \eq$ 0}
+                                \STATE return
+                            \ENDIF
+                        \ELSE
+                            \STATE $low\_qmobos \leftarrow$ $low\_qmobos$ + $qmobo$
+                        \ENDIF
+                    \ENDFOR
+                \ENDFOR
+                \IF{$nb\_waiting\_instances \eq$ 0}
+                    \STATE return
+                \ENDIF
+                \FOR{$qmobo \in$ $low\_qmobos$}
+                    \STATE Start the instance in in this $qmobo$
+                    \STATE Update $nb\_qtask\_instances$
+                    \IF{$nb\_waiting\_instances \eq$ 0}
+                        \STATE return
+                    \ENDIF
+                \ENDFOR
+            \ELSE
+                \STATE \# Find warmest QRad among the availLow and availBkgd
+                \STATE $qmobo\_list \leftarrow$ List of QMobos which is possible to run LOW priority Qtasks
+                \STATE $qrad\_list \leftarrow$ List of QRads by decreasing temperature
+                \FOR{$qrad \in$ $qrad\_list$}
+                    \FOR{$qmobo \in$ $qmobo\_list$}
+                        \STATE Start the instance in in this $qmobo$
+                        \STATE Update $nb\_qtask\_instances$
+                        \IF{$nb\_waiting\_instances \eq$ 0}
+                            \STATE return
+                        \ENDIF
+                    \ENDFOR
+                \ENDFOR
+            \ENDIF
+        \ENDFOR
+        \IF{$waiting\_instances \neq$ 0}
+            \STATE \# Some $qtaks$ could not be started.
+            \STATE Return the $waiting\_instances$ to the QNode Scheduler
+        \ENDIF
+\end{comment}
+        \end{algorithmic}
+\end{algorithm}
+
+
+\section{QNode Schedulers Variants}
+
+Based on the standard QNode scheduler we built the other four variants.
+This way we compared its performances in order to describe which one fits better for the use-cases.
+
+\subsection{Locality Based Scheduler}
+\label{subsec:localityBased}
+
+The \emph{LocalityBased} scheduler gives priority to the QBoxes already having in disk all data dependencies of the QTask to be dispatched.
+This first variant, ~\Cref{alg:LocalityBasedSched}, aims at avoiding useless data transfers if some QBoxes already have the required data dependencies of a given QTask.
+
+\begin{algorithm} %[H]
+    \caption{QNode scheduler: dispatching instances onto QBoxes - Locality based version}
+    \label{alg:LocalityBasedSched}
+        \begin{algorithmic}[2]
+            \STATE $available\_mobos\_list \leftarrow$ List of available QMobos among all QBoxes
+            \STATE $qtask\_queue \leftarrow$ The list of QTasks to be dispatched
+            \IF{$qtask\_queue \eq \emptyset$}
+                \STATE return
+            \ELSE
+                % TODO{To explain $nb\_of\_running\_instances$}
+                \STATE Sort the $qtask\_queue$ by 1) decreasing $priority$; 2) increasing $nb\_of\_running\_instances$
+                \FOR{$qtask \in$ $qtask\_queue$}
+                	\STATE $nb\_instances\_left \leftarrow$ Number of instances to be dispatched by the $qtask$
+                    \IF {$nb\_instances\_left$ > 0}
+                        \STATE $list\_qboxes \leftarrow$ List of QBoxes with the data sets required by the $qtask$.
+                        \STATE $mobos\_list \leftarrow$ List of QMobos from $available\_mobos\_list$ with BKGD priority.
+                        \STATE $mobos\_list \leftarrow$ $mobos\_list$ filtered by QMobos from QBoxes in $list\_qboxes$.
+                        \FOR{$mobo \in$ $mobos\_list$}
+                            \STATE Dispatch as many instances as possible on $mobo$.
+                        \ENDFOR
+                        \IF {{$nb\_instances\_left$ > 0} \AND {$qtask.priority\_group$ > BKGD}}
+                        
+                            \STATE \# There are more instances to dispatch and the qtask is either LOW or HIGH priority.
+                        \STATE $mobos\_list \leftarrow$ List of QMobos from $available\_mobos\_list$ with LOW priority
+                        \STATE $mobos\_list \leftarrow$ $mobos\_list$ filtered by QMobos from QBoxes in $list\_qboxes$.
+                        \FOR{$mobo \in$ $mobos\_list$}
+                                \STATE Dispatch as many instances as possible on $mobo$.
+                            \ENDFOR
+                            \IF {{$nb\_instances\_left$ > 0} \AND {$qtask.priority\_group$ > LOW}}
+                                \STATE \# There are more instances to dispatch and the qtask has HIGH priority.
+                                \STATE $mobos\_list \leftarrow$ List of QMobos from $available\_mobos\_list$ with HIGH priority
+                                \STATE $mobos\_list \leftarrow$ $mobos\_list$ filtered by QMobos from QBoxes in $list\_qboxes$.
+                                \FOR{$mobo \in$ $mobos\_list$}
+                                    \STATE Dispatch as many instances as possible on $mobo$.
+                                \ENDFOR
+                            \ENDIF
+                        \ENDIF
+                    \ENDIF
+                \ENDFOR
+                \STATE Apply Algorithm \Cref{alg:StandardSched}
+            \ENDIF
+        \end{algorithmic}
+\end{algorithm}
+
+\subsection{Full Replicate Scheduler}
+\label{subsec:fullReplicate}
+
+Namely \emph{FullReplicate}, it replicates all data dependencies of a QTask on all QBox disks before that QTask arrives in the system.
+This variant, ~\Cref{alg:FullReplicateSched}, aims at visualizing the behaviors of the scheduling policy without any impact of the data movements.
+
+\begin{algorithm} %[H]
+    \caption{QNode scheduler: dispatching instances onto QBoxes - Full Replicate version}
+    \label{alg:FullReplicateSched}
+        \begin{algorithmic}[3]
+            \STATE Replicate all data sets to all QBoxes.
+            \STATE Apply Algorithm \Cref{alg:StandardSched}
+        \end{algorithmic}
+\end{algorithm}
+
+\subsection{3-Replicated and 10-Replicated Schedulers}
+\label{subsec:3-10Replicate}
+
+Finally, the schedulers \emph{Replicate3} (\Cref{alg:3ReplicateSched}) and \emph{Replicate10} (\Cref{alg:10ReplicateSched}), that respectively replicates all data dependencies of a QTask on the 3 and the 10 least loaded QBox disks upon submission of that QTask before applying the LocalityBased dispatching policy.
+
+As the $Locality Based Scheduler$ transfers new data sets whenever it is required by some QBox and the $Full Replicate Scheduler$ transfers all data sets to all QBoxes whenever a qtask arrives in the QNode, the $3$-$10Replicate$ schedulers are two trade-offs between 0\% and 100\% of data replication before dispatching.
+They aim at reducing the waiting time of the instances of QTasks by providing more QBox candidates for the LocalityBased dispatcher.
+
+
+\begin{algorithm} %[H]
+    \caption{QNode scheduler: dispatching instances onto QBoxes - Replicate3 version}
+    \label{alg:3ReplicateSched}
+        \begin{algorithmic}[3]
+        \STATE Whenever a QTask is submitted:
+        \STATE ~~~~~$qbox\_list \leftarrow$ The list of the 3 QBoxes with most empty disks.
+        \STATE ~~~~~~Replicate all data sets on QBoxes from $qbox\_list$.
+        \STATE Apply Algorithm \Cref{alg:LocalityBasedSched}
+        \end{algorithmic}
+\end{algorithm}
+
+%\subsection{10-Replicated Scheduler}
+
+\begin{algorithm} %[H]
+    \caption{QNode scheduler: dispatching instances onto QBoxes - Replicate10 version}
+    \label{alg:10ReplicateSched}
+        \begin{algorithmic}[4]
+            \STATE Whenever a QTask is submitted:
+        \STATE ~~~~~$qbox\_list \leftarrow$ The list of the 10 QBoxes with most empty disks.
+        \STATE ~~~~~~Replicate all data sets on QBoxes from $qbox\_list$.
+        \STATE Apply Algorithm \Cref{alg:LocalityBasedSched}
+        \end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+
+
+

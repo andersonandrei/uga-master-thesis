@@ -1,0 +1,214 @@
+\documentclass[12pt, a4paper]{memoir} % for a short document
+\usepackage[french,english]{babel}
+
+\usepackage [vscale=0.76,includehead]{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+%\geometry{a4paper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\OnehalfSpacing
+% \setSingleSpace{1.05}
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+
+
+%===================================== packages
+\usepackage{lipsum}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{fullpage}
+\usepackage{mathptmx} % font = times
+\usepackage{helvet} % font sf = helvetica
+%\usepackage[latin1]{inputenc}
+\usepackage{relsize}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{textcomp}%textquotesingle
+\usepackage{multirow}
+\usepackage{pgfplots}
+\usepackage{url}
+\usepackage{footnote}
+\usepackage{caption}
+
+
+\usepackage{todonotes}
+\newcommand{\todoC}[1]{\todo[author=Clement, inline,color=red!25]{#1}}
+\newcommand{\todoA}[1]{\todo[author=Andrei, inline,color=blue!25]{#1}}
+
+
+
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+\usepackage{comment}
+\usepackage[demo]{graphicx}
+\usepackage{subfig}
+%\usepackage{hyperref}
+\usepackage{cleveref}
+
+%============================================
+\usetikzlibrary{arrows,shapes,positioning,shadows,trees}
+\makesavenoteenv{tabular}
+\makesavenoteenv{table}
+%==============================================
+\def\checkmark{\tikz\fill[scale=0.4](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;}
+%Style des têtes de section, headings, chapitre
+\headstyles{komalike}
+\nouppercaseheads
+\chapterstyle{dash}
+\makeevenhead{headings}{\sffamily\thepage}{}{\sffamily\leftmark} 
+\makeoddhead{headings}{\sffamily\rightmark}{}{\sffamily\thepage}
+\makeoddfoot{plain}{}{}{} % Pages chapitre. 
+\makeheadrule{headings}{\textwidth}{\normalrulethickness}
+%\renewcommand{\leftmark}{\thechapter ---}
+\renewcommand{\chaptername}{\relax}
+\renewcommand{\chaptitlefont}{ \sffamily\bfseries \LARGE}
+\renewcommand{\chapnumfont}{ \sffamily\bfseries \LARGE}
+\setsecnumdepth{subsection}
+
+
+% Title page formatting -- do not change!
+\pretitle{\HUGE\sffamily \bfseries \centering}
+\posttitle{\centering}
+\preauthor{\LARGE  \sffamily \bfseries \centering \newline \newline}
+
+\postauthor{\par \centering}
+\newcommand{\jury}[1]{% 
+\gdef\juryB{#1}} 
+\newcommand{\juryB}{} 
+\newcommand{\session}[1]{% 
+\gdef\sessionB{#1}} 
+\newcommand{\sessionB}{} 
+\newcommand{\option}[1]{% 
+\gdef\optionB{#1}} 
+\newcommand{\optionB} {}
+
+\renewcommand{\maketitlehookd}{% 
+\vfill{}  \large\par\noindent  
+\begin{center}\juryB \bigskip\sessionB\end{center}
+\vspace{-1.5cm}}
+\renewcommand{\maketitlehooka}{% 
+\vspace{-1.5cm}\noindent\includegraphics[height=12ex]{images/logo-uga.png}\hfill\raisebox{2ex}{\includegraphics[height=14ex]{images/logoINP.png}}\\
+\bigskip
+\begin{center} \large
+Master of Science in Informatics at Grenoble \\
+Master Informatique \\ 
+Specialization \optionB  \end{center}\vfill}
+% =======================End of title page formatting
+
+\option{Parallel, Distributed and Embedded Systems} 
+\title{Investigating Job Allocation Policies in Edge Computing Platforms} %\\\vspace{-1ex}\rule{10ex}{0.5pt} \\sub-title} 
+\author{Anderson Andrei DA SILVA}
+\date{June 24th, 2019} % Delete this line to display the current date
+\jury{
+Research project performed at Laboratoire d'Informatique de Grenoble \\\medskip
+Under the supervision of:\\
+Prof. Denis TRYSTAM\\\medskip
+Defended before a jury composed of:\\
+Prof. Martin HEUSSE\\
+Prof. Christophe C\'ERIN\\
+Prof. Hubert GARAVEL\\
+}
+\session{June \hfill 2019}
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
+
+%%% BEGIN DOCUMENT
+\begin{document}
+\selectlanguage{English} % french si rapport en français
+\frontmatter
+\begin{titlingpage}
+\maketitle
+\end{titlingpage}
+
+%\small
+\setlength{\parskip}{-1pt plus 1pt}
+
+\renewcommand{\abstracttextfont}{\normalfont}
+\abstractintoc
+\begin{abstract}
+
+Fog/Edge computing infrastructures have as one of the most important challenges the allocation of computational jobs with data-sets dependencies in an efficiently way.
+In this thesis, we present the usage of a simulated Edge platform and several metrics exemplifying how to develop and compare different scheduling strategies.
+More precisely, we utilize an on-going project involving academics and a high-tech company that aims at delivering a dedicated tool to evaluate scheduling policies in Edge computing infrastructures. 
+This tool enables the community to simulate various policies and to easily customize researchers/engineers' use-cases, adding new features if needed.
+
+The implementation is built upon the Batsim/SimGrid toolkit%.
+, which has been designed to evaluate batch scheduling strategies in various distributed infrastructures.
+%
+Although the complete validation of the simulation toolkit is still on-going, we demonstrate its relevance by studying different scheduling strategies on top of a simulated version of the Qarnot Computing platform, a production Edge infrastructure based on smart heaters. We are able to develop and simulate the current Qarnot's job allocation strategies, to propose and evaluate different approaches for different metrics.%, emphasizing the transfers and bounded slowdown.
+We also propose an analysis of their workloads and data sets dependencies.
+
+Finally, this thesis discusses the current state of the art of Edge and Cloud computing and summarizes some future directions that have been raised in the literature.
+
+\end{abstract}
+\abstractintoc
+
+
+\renewcommand\abstractname{R\'esum\'e}
+\begin{abstract} \selectlanguage{French}
+
+Les infrastructures de calcul \emph{fog} et \emph{edge} ont comme important défi l'allocation de tâches de calcul, avec les jeux de données dont elles dépendent, de manière efficace.
+Dans cette thèse, nous présentons l'utilisation d'une plateforme Edge simulée pour démontrer comment développer et comparer différentes stratégies d'ordonnancement.
+Plus précisément, nous utilisons un projet en cours regroupant des partenaires universitaires et une entreprise de haute technologie qui a pour but de délivrer un outil d'évaluation des politiques d'ordonnancement dans une plateforme de calcul \emph{Edge}.
+Cet outil permet à la communauté de simuler diverses politiques et de personnaliser facilement des cas d'utilisations de checheurs/ingénieurs, via l'ajout de nouvelles fonctionnalités si besoin.
+
+L'implémentation de cet outil est basé sur le simulateur Batsim/SimGrid, qui a été conçu pour évaluer des stratégies d'ordonnancement \emph{batch} dans diverses infrastructures distribuées.
+Bien que la validation complète de notre outil de simulation est un travail en cours, nous démontrons sa pertinence par l'étude de différentes stratégies d'ordonnancement dans une version simulée de la plateforme de Qarnot Computing, une infrastructure de calcul \emph{Edge} basée sur des radiateurs intelligents.
+Nous avons pu développer et simuler la politique d'allocation de tâches de Qarnot, pour proposer et évaluer différentes approches d'ordonnancement pour différentes métriques.
+Nous proposons également une analyse des ensembles de tâches exécutées sur la plateforme et de leurs dépendances de données.
+
+Finalement, cette thèse discute l'état de l'art du calcul dans le \emph{Cloud} et l'\emph{Edge} et résume certaines orientations futures qui ont été soulevées dans le cadre du processus de la littérature.
+
+\end{abstract}
+\selectlanguage{English}
+
+\renewcommand\abstractname{Acknowledgement}
+\begin{abstract}
+
+This work was supported by the ANR Greco project and by AUSPIN with the International Exchange Program for undergraduate students from University of São Paulo.
+
+I would like to thank my advisors, Professor Denis Trystam for the opportunity, his supporting and teachings, and Professor Alfredo Goldman for indicated me for this Master Program. Also Dr. Yanik Ngoko for having proposed the subject of this thesis.
+
+I would like to thank my family and friends for all the support, my fiancée Andréia, my mom Rosimeri, my father Alex and my brother Leonardo.
+
+Finally, I would like to thank anyone in my work group, colleagues and also ones responsible for the administrative processes from USP and UGA.
+
+\end{abstract}
+
+
+
+\cleardoublepage
+
+\tableofcontents* % the asterisk means that the table of contents itself isn't put into the ToC
+\normalsize
+
+\mainmatter
+\SingleSpace
+%==============================CHAPTERS==================
+%==============================CHAPTERS==================
+\input{chapters/1_introduction}
+\input{chapters/2_Related_work.tex}
+\input{chapters/3_Pybatsim.tex}
+\input{chapters/4_Qarnot.tex}
+\input{chapters/5_Simulated_Platform.tex}
+\input{chapters/6_Job_Allocation.tex}
+\input{chapters/7_Experiments.tex}
+\input{chapters/8_Conclusion.tex}
+%\input{chapters/9_Appendix.tex}
+%=========================================================
+%=========================================================
+
+
+%=========================================================
+\backmatter
+
+\bibliographystyle{plain} % plain-fr si rapport en français 
+\bibliography{bibfile.bib}
+
+\cleardoublepage % Goes to an odd page
+%\pagestyle{empty} % no page number
+%~\newpage % goes to a new even page
+
+\end{document}

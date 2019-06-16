@@ -1,0 +1,48 @@
+\chapter{Conclusion}
+\label{sec:conclusion}
+
+\section{Concluding Remarks}
+
+We utilized in this thesis a dedicated toolkit to evaluate scheduling policies in edge computing infrastructures. 
+Its integration into a simulator leads to a complete management system for edge computing platforms that focuses on the evaluation of scheduling strategies.
+
+This thesis presented how to use a simulated edge platform to easily evaluate existing placement strategies, even if the platforms complete validation was still an on-going work.
+It may also serve at developing and testing new strategies thanks to its modular and clear interface.
+%
+To assess the interest of such simulator, we instantiated the toolkit to simulate the whole edge platform of the \emph{Qarnot Company} based on smart heaters.
+
+We showed that to get a strategy as the best one, first of all, is important to know the workload that will be managed and its data-set dependencies.
+Thanks to our use case, we investigated several scheduling strategies and compared them to the actual policy implemented in the \emph{Qarnot} platform. We showed that the workloads managed by the Qarnot are composed, in general, of 25\% of long jobs and 75\% of short jobs. We also showed that a majority of instances in these workloads require the same data sets.
+Finally, we showed that considering this context, the best strategies are those which take into account replication of data-sets.
+
+We considered the work that has been developed in this thesis very important to the \textit{Qarnot Computing} in the sense that it could be a very useful tool to simulate their strategies, intended modifications, to anticipate some behaviors and also to prepare environments and offices that would utilize their products. All of it thanks to a simulated tool, that allows engineers to perform this kind of studies without affecting their production system.
+
+Since this context presents many challenges, we know that there are several possibilities to continue this work and the main future goal is to achieve the development of a Digital Twin, but still on going due to the difficulties presented in \Cref{sec:related}. But, we consider that this thesis was a step forward in this context.
+
+\section{Future Remarks in Edge and Cloud Computing}
+
+According to Shi et al.~\cite{vision_challenges_edge}, ~\cite{promise_edge} there will be 50 billion objects connected to the Internet by 2020, as predicted by Cisco Internet Business Solutions Group. Some IoT applications might require very short response time, some might involve private data, and some might produce a large quantity of data which could be a heavy load for networks. They conclude that Cloud computing is not efficient enough to support these applications due to the growth of data production at the edge of the network. Therefore, it would be more efficient to also process the data at the edge of the network, close to where it is generated.
+And remark that previous work such as micro data center, cloudlet, and fog computing have been introduced to the community because cloud computing is not always efficient for data processing when the data is produced at the edge of the network.
+
+Finally, several possibilities of next steps that could be taken in the future of Edge and Cloud Computing are discussed by Bittencourt et al~\cite{iot_fog_cloud}: 
+\begin{enumerate}
+
+    \item Fog and 5G for IoT: while the first 5G deployments are expected in the next couple of years, several challenges remain in how these deployments will support IoT services integrated with cloud and fog computing.
+    \item Serverless Computing: microservices management throughout the IoT-Fog-Cloud hierarchy presents challenges associated to the movement of services among IoT, fog, and cloud devices. The automatic adaptation of the execution of microservices must consider deployment location and context, but should also not neglect resource constraints that may exist at each level of the fog.
+    
+    \item Resource Allocation and Optimization: The composition of devices in the IoT-Fog-Cloud continuum brings novelties as the heterogeneity of devices and applications reach unprecedented levels, then optimization in resource allocation becomes more challenging. 
+    
+    \item Energy Consumption: The proliferation of IoT devices and the ever increasing rate of data produced are increasing pressures on energy consumption. One should expect that such pressures will have to be addressed at both hardware and software levels as well as their interplay.
+    \item Data Management and Locality: There are several open issues related to data management and locality in IoT-Fog-Cloud computing systems. First and foremost, these systems are typically composed of a broad set of heterogeneous communication technologies such as cellular, wireless, wired, and radio frequency. This means that the systems orchestrator has to be able to handle distinct underlying networks as well as different addressing schemes.
+    \item Applying Federation Concepts to Fog Computing and IoT: Federations will be widely used in many different application domains. The outstanding challenge here is how can federation capabilities be best applied in fog and IoT environments? The easiest answer is to simplify the deployment and governance models to be used.
+    \item Trust Models to Support Federation in Fog and IoT Environments: Identity and trust are the cornerstones of federation management. While a number of methods exist for establishing identity and trust, the only feasible methods are based on cryptographic methods. An inherent property of IoT environments, though, is that the closer to the edge one gets, the more resource-constrained the devices will become.
+    \item Orchestration in Fog for IoT: Despite recent developments in the area of fog orchestration for the Internet of Things, there are still several open issues that need to be addressed. First and foremost, privacy must be tackled in accordance to the European Union General Data Protection Regulation as well as similar regulations being enforced worldwide.
+    \item Business and Service Models: While cloud computing has been offering a variety of business and service models through the years, it is not clear yet if fog computing can simply incorporate the cloud models or if new business or service models would be feasible.
+    \item Mobility: Efficiently allocating resources for mobile users is a challenge in fog computing. Users and devices mobility patterns are an important aspect to provide proper service when offloading to the fog occurs. Dealing with a large set of mobile users with diverse applications and requirements is a highly dynamic scenario, which makes resource management challenging.
+    \item Urban Computing: Although several research efforts related to urban computing have been performed recently, it is possible
+    to find open issues and opportunities for studying cities and societies using location-based social networks (LBSN) data.
+    \item The Industrial Internet of Things: Designing software that exploits the Industrial Internet of Things constitutes a “system of systems” challenge. Taking into account the whole Iot-Fog-Cloud continuum, addressing the complexity of this challenge will require frameworks that enable interoperability but are also able to cope with varying and possibly conflicting user and system requirements.
+    
+\end{enumerate}
+
+\label{sec:future-steps}

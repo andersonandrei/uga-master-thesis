@@ -1,0 +1,96 @@
+\chapter{Case study: the Qarnot Computing platform}
+\label{sec:platform}
+
+We present in this section the platform of the \emph{Qarnot Computing} company, which serves as our case study.
+
+
+\section{Infrastructure Overview}
+\label{sec:qarnot}
+
+
+\emph{Qarnot Computing} has been incorporated in 2010 to develop a disruptive solution able to turn IT waste heat into a viable heating solution for buildings.
+The infrastructure is distributed in housing buildings, offices and warehouses across several geographical areas in France and Europe, in each situation valorizing the waste heat produced by IT computations to heat air and water for the building.
+As of writing this paper, the whole platform is composed of about 1,000 computing devices (\emph{QRads}) hosting about 3,000 diskless machines, and is growing quickly.
+The diskless machines have access to some storage area present on the deployment site (\emph{QBox}), shared as NFS through a LAN.
+In a typical configuration a computing machine has a 1 Gbps uplink to a common switch, which then has up to 40 Gbps uplink to the \emph{QBox}.
+The latency between a computing machine and its storage area is of the order of 1 ms.  The various deployment sites are connected to the Internet using either a public or enterprise ISP, with characteristics varying from 100 Mbps to 1 Gbps symmetric bandwidth to the Internet, and about 10 ms latency to French data centers used by \emph{Qarnot} to host control and monitoring infrastructure, central storage services, and gateways to its distributed infrastructure.
+
+On a daily basis, from a few hundred to several thousands of batch jobs are processed by \emph{Qarnot} batch computing PaaS, and thousands of cores are provisioned for corporate customers deploying infrastructure. Up to tens of GBs of data are replicated from central storage to edge computing sites.
+
+%\emph{Qarnot} deploys high performance computing hardware and storage capacity to buildings, which makes it a fitting infrastructure to locally gather and process data that is generated at the edge of the network (for instance by smart buildings). This can reduce global data movements, allow buildings to be autonomous in terms of IT and to handle Internet connectivity loss gracefully. One objective of this simulator is to evaluate such local use-cases and investigate edge infrastructure dimensioning. 
+\emph{Qarnot} deploys high performance computing hardware and storage capacity to buildings, which makes it a fitting infrastructure to locally gather and process data that is generated at the edge of the network (for instance by smart buildings). One objective of the edge simulator is to evaluate evolutions of the \emph{Qarnot} architecture to handle such local use-cases. It will allow investigating the edge infrastructure dimensioning as well as the optimization of the local data and processes placement with regard to the global ones. This can reduce global data movements, enable buildings to be autonomous in terms of IT and to handle Internet connectivity loss gracefully.
+
+%\emph{Qarnot computing} has been incorporated in 2010 to develop a disruptive solution able to turn IT waste heat  into a viable heating solution for buildings.
+%Indeed, with the growing importance of connected services and things, the ``cloud industry'', users do realize that this revolution needs digital factories, the data centres.
+%The problem is that such places that gather thousands of servers are huge energy consumers. About 3\% of the world electricity is used in data centres~\cite{DCs_elec_consumption}. About 40\% of this electricity is used to run the data centres considering an average PUE of 1.67~\cite{PUE_uptimeinstitute}, mainly for cooling which represent between 30\%~\cite{yuventi2013critical} to 38\%~\cite{ni2017review} of average data centres consumption, according to studies.
+%\emph{Qarnot computing}'s solution proposes an actual way of using IT waste heat to warm housing buildings and offices, and therefore avoid data centres’ cooling and regular space heating energy consumption.
+%In addition, by bringing IT servers within the building, this becomes an answer to growing edge computing needs as well as integrating actual IT resources into buildings.
+%\emph{Qarnot computing}'s goal is to operate as a public cloud based on a new computing paradigm providing services for cloud data computing as well as heating in smart buildings~\cite{HeatingAsACloudService}.
+%The \emph{Qarnot} platform consists of a collection of digital heaters, named \emph{QRads}, embedding several processors attached with a large aluminium heatsink to diffuse heat locally, where it is useful.
+%This way, the heat dissipated by the processors executing jobs provides the heating service.
+
+
+
+\section{Platform Terminology}
+
+The job and resource manager of the \emph{Qarnot} platform, named \emph{Q.ware}, is based on a hierarchy of 3 levels as shown in \Cref{fig:qarnot-platform}: the \emph{QNode}-, the \emph{QBox}- and the \emph{QRad}-level.
+
+\begin{figure} %[H]
+    \centering
+    \includegraphics[width=.6\linewidth]{images/qarnot-schema.pdf}
+    \caption{Scheme of the Qarnot platform.}
+    \label{fig:qarnot-platform}
+\end{figure}
+
+The QNode is the root node, a ``global'' server that takes placement decisions for the whole platform. It can be viewed as a load balancer for the platform.
+Connected to this QNode there are the QBoxes, which are ``local'' servers in smart buildings that take scheduling decisions locally on their own computing nodes.
+Each QBox is in charge of a set of computing nodes, the QRads, which are composed of one or several computing units denoted by \emph{QMobos}.
+
+Moreover, a centralized storage server, the \emph{CEPH}, is present at the QNode-level while each QBox has its own local storage disk. From a physical point of view, the QNode and CEPH are on the cloud while QBoxes are distributed over smart buildings of several cities. QRads among a building are distributed in different rooms.
+
+The \emph{Qarnot} platform receives two types of user requests: requests for computing and requests for heating.
+The computing requests describe the workload to be executed on the platform.
+They are made by users that first upload input data needed to execute their jobs (named \emph{QTasks}) to the centralized server and upload a Docker image either to the centralized server or the Docker Hub. Then, they submit the QTasks to the QNode.
+A QTask can be decomposed in a bag of several \emph{instances} that share the same Docker image and data dependencies, but with different command arguments.
+This can be used for example to process each frame of a given movie, with one frame or a range of frames per instance.
+
+The heating requests are made by inhabitants that can turn on and off the smart heaters in their homes, or set a target temperature for rooms to be reached as soon as possible.
+Since the computing units in a smart heater are unavailable when cooling is necessary, and are available otherwise, such changes increase the heterogeneity challenges of and edge infrastructure: the computation resource does not simply appear  or disappear but also varies according to the heating needs. 
+
+\section{Current Workflow}\label{ssec:qarnot-sched}
+
+Whenever QTasks are submitted on the platform all the data dependencies should be uploaded to the CEPH.
+To be executed, these QTasks have to be scheduled to the QBoxes and then scheduled onto QMobos through two scheduling steps.
+
+The first step takes place at the QNode-level.
+The QNode greedily dispatches as many instances of the QTasks ordered by priority on QBoxes, depending on the number of QMobos available for computation on each QBox.
+
+The second step takes place at the QBox-level.
+Upon receiving instances of a QTask, the QBox will select and reserve a QMobo for each instance and fetch from the CEPH each missing data dependency before starting instances.
+
+Notice that, at all times, a \emph{FrequencyRegulator} runs on each QRad to ensure that the ambient air is close to the target temperature set by the inhabitant, by regulating the frequencies of the QMobos and completely turning off a QRad if it is too warm.
+Moreover, whenever there is no computation performed on the QMobos while heating is required, some ``dummy'' compute-intensive programs are executed to keep the QRad warm. \\
+
+\Cref{fig:qarnot-diagram} summarizes the execution flow of a QTask within the \emph{Qarnot} platform.
+
+\begin{figure} %[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/qarnot-diagram.png}
+    \caption{Execution flow of a QTask on the Qarnot platform.}
+    \label{fig:qarnot-diagram}
+\end{figure}
+
+As said before, QTasks to be executed on this platform are submitted to the QNode and all the data dependencies are uploaded to the CEPH (steps 01 and 02).
+To be executed, these QTasks, along with their data dependencies, have to be sent to the QBoxes and then scheduled onto QMobos.
+Every 30 seconds, the QBoxes send information about the state of their disk, QRads and QMobos to the QNode (steps 03 through 05), in particular, the number of QMobos available for computation and the free storage space are reported.
+
+A first scheduling process is made at the QNode-level to dispatch instances of the QTasks to the QBoxes (steps 06 and 07). The QNode tries to dispatch, for each QTask taken by priority, as many instances as possible onto QBoxes, with respect to the number of available QMobos and storage space left on the QBox disks.
+
+Upon receiving instances of a QTask, the QBox will reserve for each instance a QMobo from the warmest QRad for the case of low priority QTask, and a QMobo from the coolest QRad in the case of high priority (step 08).
+This distinction is made to keep more QMobos available in case high priority QTasks are sent to the QBox in the near future. The QBox then checks whether the Docker image and other data dependencies for these instances are on disk and fetches any missing data from the CEPH (steps 09 and 10).
+
+Once all data transfers are completed for this QTask, the reserved QMobos are rebooted and the instances are started (steps 11 through 14). When the instance completes, its output is uploaded to the CEPH and the QNode is notified of the instance completion (steps 15 through 17).
+Finally, the queue of QTasks is updated and if an instance of the same QTask can be directly dispatched, it is sent to the QBox and the execution starts immediately, without rebooting the QMobo (steps 18 and 19).
+
+
+

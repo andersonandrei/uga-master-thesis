@@ -1,0 +1,88 @@
+\chapter{A Dedicated Scheduling Simulator for Edge Platforms}
+\label{sec:simulation}
+
+
+%Although researchers rely on mathematical models to investigate scheduling strategies, the use of simulators has been proven to be an appropriate tool to identify side effects and major trends at large scale and in presence of dynamic events such as node failures or network disconnections.  
+%In this section we first present an overview of the framework we built on top of Batsim/Simgrid and second gives details regarding the different extensions we developed. 
+We chose to Batsim/SimGrid instead of available fog/edge simulators~\cite{ifogsim,edgecloudsim,iotsim} for several reasons: 
+\begin{itemize}
+    \item Batsim has been specially designed to test and compare batch scheduling policies in distributed infrastructures. In other words, the design of Batsim enforces researchers to use the same abstractions and thus, favor straightforward comparisons of different strategies, even if they have been implemented by different research groups.
+    \item The accuracy of the internal models (computation and network) of SimGrid has been already validated.
+    \item Batsim provides a Python API that makes the development of a scheduling strategy simple.
+\end{itemize} 
+
+Released in 2017, Batsim~\cite{batsim} delivers a high-level API to facilitate the development of batch scheduling algorithms that can be then simulated on top of SimGrid~\cite{simgrid}, the well-proven simulator toolkit for distributed infrastructures.
+%
+Thus, is possible to rely on high-level tools that have been proposed and already validated. Some parts have been customized to reflect the edge specifics, especially the decision processes as a goal of this thesis, and the others have been developed by the workgroup at the same time. Both will be explained in the following.
+
+\section{Operational Components}
+\label{ssec:operational_components}
+
+In this section is discussed the role of the different components, namely SimGrid, Batsim, the \emph{decision process} and their interactions.
+
+\subsection{SimGrid}
+SimGrid~\cite{simgrid} is a generic simulator framework that enables simulation of any distributed system. 
+In addition to providing the program to be evaluated, performing simulations with SimGrid requires (i) writing a platform specification, (ii) formatting workload input data, (iii) interfacing the program to evaluate. 
+
+The choice of using SimGrid as the main engine for Batsim is mainly due to its relevance in terms of performance, as well as its validity that has been backed-up by many publications~\cite{simgrid_publis}.
+Moreover, it enables the description of complex infrastructures, such as hierarchical ones, that are composed of many interconnected devices with 
+possibly highly heterogeneous profiles.
+Finally, the injection of external events on demand, such as node apparitions/removals or network disconnections, has allowed the easy simulation of complex systems such as fog/edge infrastructures.
+
+\subsection{Batsim and the Decision Process}
+Batsim~\cite{batsim} is an infrastructure simulator for jobs and I/O scheduling, built on top of SimGrid, to help the design and analysis of batch schedulers.
+Batch schedulers, \textit{a.k.a.,} Resource and Jobs Management Systems, are systems in charge of  managing resources in large-scale computing centres, notably by scheduling and placing jobs. Batsim allows researchers to simulate the behavior of a computational platform on which a workload is executed according to the rules of a decision process.
+It uses a simple event-based communication interface; as soon as an event occurs, Batsim stops the simulation and reports what happened to the \emph{decision process}.
+
+\emph{The decision process} embeds the actual scheduling code to be evaluated. 
+In other words, in order to simulate a given scheduling algorithm, an experimenter has to implement this decision process. Comparing different algorithms consists in 
+switching between different decision processes, which is straightforward.
+
+\begin{figure} %[H]
+    \centering
+    \includegraphics[width=.8\textwidth]{images/batsim-pybatsim.png}
+    \caption{Batsim and decisions maker interaction.}
+    \label{fig:batsim-pybatsim}
+\end{figure}
+
+\Cref{fig:batsim-pybatsim} illustrates the interaction between Batsim and the decision process. It reacts to the simulation events received from Batsim, takes decisions according to the given scheduling algorithm, and drives the simulated platform by sending back its decisions to Batsim.
+Batsim and the decision process communicate via a language-agnostic synchronous protocol.
+In this work, we used Batsim's Python API to implement the decision process, which provides functions to ease the communication with Batsim.\\
+
+More details on Batsim and SimGrid mechanisms can be found on Chapter 4 of Millian Poquet's manuscript~\cite{MillianThesis}.
+
+\section{Extensions}
+There are a couple of extensions that have been developed to deal with edge challenges. In this section, is presented the ones that are already available, namely a SimGrid plug-in, the events injector and the storage controller.
+Modifications made in Batsim\footnote{https://gitlab.inria.fr/batsim/batsim/tree/temperature} and its Python API\footnote{https://gitlab.inria.fr/batsim/pybatsim/tree/temperature} for this work are available in a separate branch of their main repository.
+
+\subsection{Batsim/SimGrid Plug-in}
+\label{sssec:plugins}
+
+One of the strengths of SimGrid is its plug-in architecture.
+For instance, one plug-in of interest, has been validated by a previous work of the SimGrid team, is the estimation of the energy consumption of a host for a period of time, given inputs such as the power state of a host, the number of computing cores and the load of each core~\cite{EnergyPlugin}.
+
+%In the context of edge IoT platforms, providing other metrics to the simulation is of interest, and can take the form of new plug-ins. We extended the Batsim communication protocol to benefit from those plug-ins information (\ie information related to SimGrid plug-ins can be reified on demand to the decision process).
+
+As will be discussed later in the document, was leveraged this extension in the \emph{Qarnot} case study. Concretely, was developed an additional service on top of the aforementioned energy plug-in that computes the temperature of a host from its energy consumption and other physical parameters.
+
+%\todoAll{Adrien: Alex could you please read the above subsubsection thanks}
+\subsection{External Events Injector}
+\label{sssec:external-events}
+
+To simulate the execution of a fog/edge infrastructure, which by essence is subject to very frequent unexpected or unpredictable changes% of its characteristics and operations
+, this simulator offers the opportunity to inject external events on demand. Those events impact the behavior of the platform during the simulation and thus the choices of the scheduling strategy. For example, one would be interested in studying the behavior and resilience of a scheduling policy when a range of machines may become unexpectedly unavailable for a period of time, due to a failure or action occurring at the edge (\eg from a local user).
+
+The mechanism we implemented replays external events that occurred at a given time.
+When an event occurs it is handled by the main process of Batsim, that updates the state of the platform and the simulation, and then forwarded to the decision process.
+
+An event is represented as a JSON object that contains two mandatory fields: a $timestamp$, which indicates when the event should occur, and $type$, the type of the event.
+Then, depending on the type of event, other fields can complement the event description, such as the name of the unavailable resource for example, the new value of an environment parameter such as the network bandwidth, or anything that is of interest to the decision process.
+External events are injected in Batsim by one of its internal processes, which reads the list of events from an input file containing one of the above described JSON objects per line.
+
+This event injection mechanism is generic by the concept: users can define their own types of events and associated fields, which will be forwarded to the decision process without any modification in the code of Batsim.
+
+\subsection{Storage Controller}
+The Storage Controller is a Python module that exposes multiple functions to the scheduler in order to manage the storage entities as well as the data transfers.
+In order to give the scheduler reliable information, it keeps track in real-time of the platform status, \ie the on-going data transfers, the available resources, etc.
+It also manages all aspects related to caching policies, while offering advanced features such as speculation.
+%\todoAll{if there is space, please give details regarding how the decision process interacts with the storage controller. }

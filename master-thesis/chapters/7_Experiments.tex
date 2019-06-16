@@ -1,0 +1,237 @@
+\chapter{Experiments, Discussions and Results}
+\label{sec:experiments}
+
+By the logs extracted detailed in ~\Cref{secsec:traces}, we were able to extract workloads for specific periods of time. To compare the results of simulations we utilized workloads of one and three days, one and two weeks. As the one and three days show less information and the two weeks show a lot of it, this section will be presented results regarding workloads with the size of one week. Due to recent modifications in the extractor, we had less than two months of data available. To characterize one full month, we will present four workloads, with each one stated from 03, 10, 17 and 24 of May, denoted respectively as 1w\_03, 1w\_10, 1w\_17 and 1w\_24. In addition, the platform simulated was composed by approximately 3390 QMobos, from 669 QRads, managed by 20 QBoxes. 
+
+\section{Job's Processing Time}
+\label{sec:processing-time}
+
+By the extracted logs, the processing time distribution for each workload was computed, such that, for each QTask in each workload: $processing\_time = real\_finish\_time - real\_start\_time$. In other words, was computed a list of processing time for each instance of a workload, then a distribution could be done and is presented in \Cref{tab:processing-time}.
+
+\begin{table*}
+\begin{center}
+\caption{Processing time distribution for different weeks of workload}
+\label{tab:processing-time}
+%\begin{tabular}{|c|S|S|S|S|}
+\begin{tabular}{|c|c|c|c|c|}
+    %\multicolumn{5}{|c|}{\textbf{}}   
+    \toprule
+    \textbf{Statistics} & \textbf{1w\_03} & \textbf{1w\_10} & \textbf{1w\_17} & \textbf{1w\_24} \\ \midrule
+    \textbf{Count} &	7350 & 5989 & 5497 & 8850 \\ \midrule
+    \textbf{Mean (s)}& 465.96 & 582.25 & 480.21 & 403.93 \\ \midrule
+    \textbf{Std (s)} & 817.18 & 2400.22 & 2268.20 & 1723.62 \\ \midrule
+    \textbf{Min (s)} & 1.0 & 1.0 & 1.0 & 1.0 \\ \midrule
+    \textbf{25\% (s)} & 132.0 & 77.0 & 48.0 & 34.0 \\ \midrule
+    \textbf{50\% (s)} & 235.0 & 151.0 & 106.0 & 117.0 \\ \midrule
+    \textbf{75\% (s)} & 635.0 & 425.0 & 207.0 & 291.0 \\ \midrule
+    \textbf{Max (s)} & 35372.0 & 27121.0 & 29700.0 & 28952.0 \\ \midrule
+    \bottomrule
+\end{tabular}
+\end{center}
+\end{table*}
+
+For all workloads, these distributions characterize the workloads as 25\% composed by long jobs, such that, long jobs in this context means jobs much longer than the majority of others. Looking for each workload, \Cref{tab:processing-time} shows that:
+\begin{itemize}
+    \item 1w\_03: 75\% of the jobs are processed in less than 635s, and 25\% are processed up to 35372s, which is 55 times the maximal processing time of short jobs.
+    
+    \item 1w\_10: 75\% of the jobs are processed in less than 425s, and 25\% are processed up to 27121s, which is 63 times the maximal processing time of short jobs.
+    
+    \item 1w\_17: 75\% of the jobs are processed in less than 425s, and 25\% are processed up to 29700s, which is 143 times the maximal processing time of short jobs.
+    
+    \item 1w\_24: 75\% of the jobs are processed in less than 291s, and 25\% are processed up to 28952s, which is 99 times the maximal processing time of short jobs.
+\end{itemize}
+
+Because of this distribution, we decided to split, for each workload, the results of the simulations in two others, one composed of the jobs from the 75\% of the distribution, and the other one composed of the jobs from the 25\% of the distribution, respectively denoted by short\_jobs and long\_jobs. In the same idea will be denoted as all\_jobs the original workload.%one, composed by \emph{short\_jobs} and \emph{long\_jobs}.
+
+First, we will present in the next sections the analyses of results of all\_jobs, then we will compare these with the analyses of short\_ and long\_ jobs aiming to point out some possible effect caused by the size of the jobs.
+
+\section{Job Allocation}
+
+We decided to illustrate the job allocation by Gantt Charts. These charts represent in x-axis the processing time of the jobs, which means, the time that a job spent to be executed. In the y-axis it shows the resources, which for us mean the QMobos.
+This way, it is possible to see rectangles representing the job's execution, such that, the size of the rectangles represent the size of the jobs, being visually distinguishable.
+In addition, by these charts it is possible to see the difference among the scheduling policies whenever we see the rectangles in different positions for each policy.
+
+The Gantt Charts in \Cref{fig:gantt-charts} represents the allocation of jobs for the workload of 1w\_24 for the five presented policies. The sixth figure show all the previous five merged into one, super imposing it.
+Looking at these charts, it is possible to conclude that the allocation among the schedulers changes for each policy. Especially on the sub-figure \textit{(f)  All schedulers difference} because it shows the super imposing of all others charts, which means that, if the allocation would be the same, the super imposing would produce the same picture, which does not happen here.
+
+\begin{figure}
+\centering
+    \begin{tabular}{cc}
+        \subfloat[Standard]{
+            \includegraphics[width = 3in]{images/experiments/1w_24-05-2019_qarnotNodeSched_ganttChart.png}} &
+        \subfloat[Locality based]{
+            \includegraphics[width = 3in]{images/experiments/1w_24-05-2019_qarnotNodeSchedAndrei_ganttChart.png}}\\
+        \subfloat[Full replicate]{
+            \includegraphics[width = 3in]{images/experiments/1w_24-05-2019_qarnotNodeSchedFullReplicate_ganttChart.png}} &
+        \subfloat[Replicate3]{
+            \includegraphics[width = 3in]{images/experiments/1w_24-05-2019_qarnotNodeSchedReplicate3LeastLoaded_ganttChart.png}}\\
+        \subfloat[Replicate10]{
+            \includegraphics[width = 3in]{images/experiments/1w_24-05-2019_qarnotNodeSchedReplicate10LeastLoaded_ganttChart.png}} &
+        \subfloat[All schedulers difference]{
+            \includegraphics[width = 3in]{images/experiments/1w_24-05-2019_diff_ganttChart.png}}
+    \end{tabular}
+\caption{Gantt Charts for the 1w\_24 workload}
+\label{fig:gantt-charts}
+\end{figure}
+
+
+\section{Data Sets Dependencies}
+
+In order to investigate if the data sets affect somehow the scheduling policies, we will discuss in this section analyses regarding the data sets dependencies. We figured out that several QTasks depend on the same data sets, which could cause different results if considered at the scheduling decision phase, since \Cref{alg:StandardSched} does not consider this information.
+
+\begin{comment}
+
+\todoC{put labels to the figures, and Cref here}
+\todoA{There labels for all figures, should I change?}
+
+\cref{fig:datasets-dependencies-1w_03, fig:datasets-dependencies-1w_10, fig:datasets-dependencies-1w_17, fig:datasets-dependencies-1w_24}
+
+\Cref{fig:datasets-dependencies-1w_10}, \Cref{fig:datasets-dependencies-1w_17} and \Cref{fig:datasets-dependencies-1w_24}
+
+\end{comment}
+
+The figures 7.2, 7.3, 7.4 and 7.5 show in x-axis the id of the data sets and in the y-axis the number of instances that depend on that data set. It is important to emphasize here two points, the first one is that a QTask is composed of many instances but, instances from the same QTask could be allocated on different QBoxes, if there are not enough available QMobos on the same QBox at the allocation phase. Then, these instances would require the data set transfer for two or more different QBoxes.
+The second one, as described in \Cref{subsec:workload}, a QTask depends on a list of data sets.
+Is important to emphasize here that, these figures will describe the number of instances requiring the same data sets, which does not mean that the sum of all bars totals the number of instances, because one could require the data sets with ID: 3, 5, 23 and 30, for example. In addition, the data sets with ID 1 represents \textit{null} data sets, which means that the jobs are not dependent on any data set. \\
+
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/experiments/datasets/1w_03-05-2019_data_sets_dependencies.png}
+    \captionsetup{justification=centering,margin=3cm}
+    \caption{Data sets dependencies for 1w\_03 workload. \textbf{Number of instances:} 7350. \textbf{Number of data sets:} 60}
+    \label{fig:datasets-dependencies-1w_03}
+\end{figure}
+
+From \Cref{fig:datasets-dependencies-1w_03}, one can see that the data set with ID 2 is required by about 6,700 instances, which represents 91\% of the total number of instances. It is followed by the data set with ID 19, about 5,000 instances, representing 68\% of the total number of instances. In the figure, one can also see other data set IDs reasonably required as 17, 34, 40 and 45, but, not so much as the two emphasized. \\
+
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/experiments/datasets/1w_03-05-2019_data_sets_dependencies.png}
+    \captionsetup{justification=centering,margin=3cm}
+    \caption{Data sets dependencies for 1w\_10 workload. \textbf{Number of instances:} 5990. \textbf{Number of data sets:} 43}
+    \label{fig:datasets-dependencies-1w_10}
+\end{figure}
+
+From \Cref{fig:datasets-dependencies-1w_10}, one can see that the data set with ID 18 is required by about 2,900 instances, which represents 48\% of the total number of instances. It is followed by the data sets with ID 34 and 16, about respectively 2,400 and 1,700 instances, representing 40\% and 28\% of the total number of instances. In the figure, one can also see other data set IDs reasonably required as 1, 15, 24, 33 and 37, but, not so much as the two emphasized. \\
+
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/experiments/datasets/1w_17-05-2019_data_sets_dependencies.png}
+    \captionsetup{justification=centering,margin=3cm}
+    \caption{Data sets dependencies for 1w\_17 workload. \textbf{Number of instances:} 5506. \textbf{Number of data sets:} 47}
+    \label{fig:datasets-dependencies-1w_17}
+\end{figure}
+
+\\
+
+From \Cref{fig:datasets-dependencies-1w_17}, one can see that the data set with ID 9 is required by about 3,700 instances, which represents 67\% of the total number of instances. It is followed by the data sets with ID 25 about 1,800 instances, representing 33\% of the total number of instances. In the figure, on can also see other data set IDs reasonably required as 1, 26 and 30, but, not so much as the two emphasized. \\
+
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/experiments/datasets/1w_24-05-2019_data_sets_dependencies.png}
+    \captionsetup{justification=centering,margin=3cm}
+    \caption{Data sets dependencies for 1w\_24 workload. \textbf{Number of instances:} 8852. \textbf{Number of data sets:} 66}
+    \label{fig:datasets-dependencies-1w_24}
+\end{figure}
+
+From \Cref{fig:datasets-dependencies-1w_24}, one can see that the data set with ID 3 is required by about 8,500 instances, which represents 96\% of the total number of instances. It is followed by the data sets with ID 15 about 5,000 instances, representing 56\% of the total number of instances. In the figure, one can also see other data set IDs reasonably required as 13 and 14, but, not so much as two the emphasized. \\
+
+Analyzing the data set dependencies we recognized that the four workloads extracted from Qarnot are not equally distributed in terms of data sets. In other words, it is possible to see for these ones that there are at least two very popular data sets among the instances. It could affect the scheduling policies and will be discussed in the next section.
+
+\section{Scheduling Metrics}
+
+%In this section, we present preliminary evaluations we conducted with our simulator. 
+In order to compare various scheduling strategies based on real-world traces of the \emph{Qarnot} platform we will discuss in this section the number and the total size of data transfers, along with the bounded slowdown of the instances. The following discussion will be based on plots such that the x-axis represents the workloads, respectively 1w\_03, 1w\_10, 1w\_17 and 1w\_24. In addition, it is possible to see in x-axis the 5 scheduling policies implemented as described in  \Cref{sec:schedulers}, respectively the FullReplicate, LocalationBased, Replicate10, Replicate3 and the Standard. The y-axis represents the metrics discussed.
+
+\subsection{Data Transfers}
+\label{sub:exp-datasets}
+
+The number of transfers and the total size of data transfers are two important metrics if, for example, there are huge data sets which would take long time to be transferred, or in the case of limited resources in terms of storage disks, which will not support many data sets in the same machine.
+
+\begin{figure} [H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/experiments/metrics/full_metrics_data.pdf}
+    \caption{Total data transferred for 1 week workload}
+    \label{fig:data-set-dependencies}
+\end{figure}
+
+From \Cref{fig:data-set-dependencies} one can see that for both the \textit{Number of data transfers} and the \textit{Total size of data transferred (GB)}, the schedulers FullReplicate, Replicate10 and Replicate3 are the three with the highest values, with the exception of the Replicate3Least-Loaded for the workload 2 in the \textit{Number of data transfers}. But, in general, this behavior is totally expected since, respectively, they replicate data sets in all, 10 and 3 QBoxes.
+
+On the other hand, at the first time, we expected that the LocalityBased would reduce the number of data transfer compared to the Standard scheduler. But, as we analyzed the data sets dependencies, this behavior could be justified by the high popularity of few data sets among the workloads. We believe that what happens in this specific scenario is that the LocalityBased would reduce data transfers until a QBox get unavailable running as many instances as possible. Then, this very popular data sets should be transferred to other QBoxe and it would happen, maybe, during the whole simulation. This way, the LocalityBased got close or higher values between itself and the Standard scheduler, even the last one does not consider any location or data set information in the allocation decision phase.
+
+We believe that if the data sets dependencies would be well distributed among the workloads, the LocalityBased policy would reduce the number of data transfers, but it is not our case and we would need to simulate this specific kind of data to validate it.
+
+\subsection{Bounded Slowdown}
+
+The bounded slowdown is a classical metric that has been utilized in the literature~\cite{job_metrics} and was implemented in the context of this thesis because it was not computed from the toolkit utilized. We computed the bounded slowdown as $bounded\_slowdown = max \{(waiting\_time + execution\_time) / max\{execution\_time, \tau\} , 1\}$ , such that $\tau$ denotes a threshold, equals 1 for our experiments, since this is the minimum size of our instances as the~\cref{tab:processing-time}.
+Here we also considered that \textit{waiting\_time} of an instance depends on the time to transfer the required data sets and the time to decide in which QMobo the instance should be executed. 
+This metric has been utilized to analyze if the waiting time of a job is proportional of its size. Considering that one important goal of scheduling policies is manage the waiting time of the jobs, it is an important metric.
+In addition, it is known that this metric is more sensitive for short jobs, since if the execution time is close to zero, this formula depends on the waiting time and the threshold. If the waiting time of short jobs is much bigger than its execution time, the bounded slowdown will be high, which does not mean that the execution time was big, but the inverse.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/experiments/metrics/full_metrics_slowdown.pdf}
+    \caption{Bounded Slowdown for 1 week workloads}
+    \label{fig:full-bounded-slowdown}
+\end{figure}
+
+\\
+From \Cref{fig:full-bounded-slowdown} one can see that the FullReplicate scheduler presents the lowest values for both measurements, the \textit{Mean bounded slowdown} and \textit{Max bounded slowdown}. For almost all the other cases, the Replicate10 and Replicate3 are the next lowest ones, with the exception of the \textit{Max bounded slowdown} with the second and fourth workloads.
+But, in general, this behavior is also totally expected since these schedulers replicate much more data sets than the LocalityBased and Standard. Then, the waiting time of jobs managed by FullReplicate, Replicate10 and Replicate3 tends to be small, because it does not depend on the data transfer time, it just depends on the decisions process time, in general.
+
+Following the same justification as \Cref{sub:exp-datasets}, the LocalityBased presents close or higher values when compared with the Standard thanks the data sets dependencies.
+We believe that because of the waiting time of the data transfers, the instances managed by these schedulers wait more time than the others managed by the replicate based schedulers (FullReplicate, Replicate10, Replicate3).
+In addition, we believe that the LocalityBased presents, in general, a bounded slowdown bigger than the Standard because the LocalityBased does, also in general, more data transfers and transfers more data than the Standard.
+
+To analyze in more detail, as we explained above, the bounded slowdown is more sensitive for short jobs than long jobs, then in the next section we will present comparisons looking for grouped instances by their sizes.
+
+\subsection{Job's Size Effect in the Measured Metrics}
+
+Due to the characterization of 75\% of the jobs as short and 25\% as long, the results of the previous simulations were split into two others. 
+This way we investigated the effect of the short and long jobs on the bounded slowdown. Once again, it is important to emphasize that the data come from the same simulation, we filtered the results from the $all\_jobs$ and split into two other, as $small\_jobs$ and $long\_jobs$, as explained in \cref{sec:processing-time}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/experiments/metrics/short_metrics_slowdown.pdf}
+    \caption{Bounded Slowdowns for short jobs from 1 week workloads}
+    \label{fig:short-bounded-slowdown}
+\end{figure}
+
+
+
+As one can see, the behavior in \Cref{fig:short-bounded-slowdown} is, in general, the same as \Cref{fig:full-bounded-slowdown}.
+As this data is composed only for short jobs, its $execution\_time$ is low, then, we attributed the high values visible in \Cref{fig:short-bounded-slowdown} to its $waiting\_time$. Finally, as the replicate based schedulers (FullReplicate, Replicate10, Replicate3) present low values when compared with the others, we attributed that the $waiting\_time$ for the LocalityBased and Standard schedulers is impacted much more by the data transfers time than the allocation decision process time.
+
+The behavior in \Cref{fig:long-bounded-slowdown} is different when compared with \Cref{fig:full-bounded-slowdown}. Here the values for the FullReplicate are the highest ones and we justify it by the $waiting\_time$ from the allocation decision process that, in general, takes more time than short jobs. But, is important to emphasize here that the values of \Cref{fig:long-bounded-slowdown} in the \textit{Mean bounded slowdown} are much lower than the presented in ~\Cref{fig:short-bounded-slowdown}, since that is not possible to see the second tick in the y-axis of this plot.
+
+Comparing \Cref{fig:short-bounded-slowdown} and \Cref{fig:long-bounded-slowdown} one can see that the premise that short jobs are more sensitive to these metrics is true in our case, because the first figure presents much more high values than the second.
+And considering that 75\% of the jobs are being represented in \Cref{fig:short-bounded-slowdown} as the short jobs and 25\% in \Cref{fig:long-bounded-slowdown} as long jobs, we understood that the behavior of \Cref{fig:full-bounded-slowdown} is much more impacted by the short jobs into these workloads. 
+
+\begin{figure} [H]
+\centering
+    \includegraphics[width=0.9\textwidth]{images/experiments/metrics/long_metrics_slowdown.pdf}
+    \caption{Bounded Slowdowns for long jobs from 1 week workloads}
+    \label{fig:long-bounded-slowdown}
+\end{figure}
+
+\section{Analyses of Results}
+
+All performed simulations were deterministic, then we ran one simulation with each scheduler for several inputs corresponding to 1 day, 3 days 1 week or 2 weeks of the \emph{Qarnot} platform.
+The running time of one simulation was less than 5 minutes for a 1-day simulation, around 10 minutes for a 3-day simulation, less than 35 minutes for a 1-week simulation and around 50 minutes for a 2-week simulation, with about $15\%$ of the time spent in the decision process.
+
+We compared the different scheduling policies according to various metrics, including the number of transfers, the total transferred data and the mean and max bounded slowdown. In addition, we analyzed the job's processing time distribution and the data sets dependencies.
+
+Due to lack of space, and as the simulations of the four periods (1-day, 3-days, 1-week and 2-week) lead to similar conclusions, we only present in \Cref{tab:processing-time} the results for the 1-week period.
+
+The results show that, as expected, the three policies using replication improved the scheduling metrics compared to Standard, with a cost of an increasing size of the data transfers.
+Regarding the LocalityBased scheduler, the improvement of performance is quite low and even worse for all presented metrics, when compared with the Standard algorithm. This was quite surprising at first as the total transferred data actually increased, while the initial purpose of this scheduler was to leverage the data transfer already performed. But, regarding the data set dependencies it was justified.
+%
+Such results, which are counter-intuitive, clearly illustrates the importance of validating the behaviors of scheduling algorithms through simulations before envisioning their real deployment. 
+
+The first thing to notice is that all variants improve the scheduling metrics compared to the standard algorithm of \emph{Qarnot}, except for the mean bounded slowdown of LocalityBased, which is very close to the baseline, with a cost of an increasing size of the data transfers. 
+
+Comparing the replication policies, we can see that $Replicate3$ and $Replicate10$ present similar results, and that the FullReplicate gains are almost double compared to the partial replication policies with a cost of doubling the size of the data transfers as well.
+We can deduce that replicating data-sets before applying the LocalityBased placement policy is beneficent users' point of view, but deciding how much replication the system should do is not trivial.
+Going from 3 to 10 replicas does not seem to improve much the quality of service while doubling the cost in terms of data transfers, and duplicating the data sets everywhere almost halves the mean waiting time and bounded slowdown compared to the standard \emph{Qarnot} scheduler, at a cost of multiplying by 5 the total size of data transfers.
+
+Finding a good job scheduling policy for \emph{Qarnot Computing} is still an ongoing action. And regarding the data sets dependencies, further strategies could predict the data transfers time and then, the scheduling policies could be mixed between a replicated one whenever a very popular data set is recognized, and locality based if the data sets would be eqaully distributed among the jobs.
