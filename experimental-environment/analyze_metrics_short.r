@@ -40,9 +40,9 @@ jobs_time_fullrep <- jobs_time_fullrep %>% filter(jobs_time_fullrep$start_time !
 
 # To add a column for the Scheduler name
 schedule_standard$Scheduler <- "Standard"
-schedule_location_based$Scheduler <- "LocationBased"
-schedule_replicate3LeastLoaded$Scheduler <- "Replicate3LeastLoaded"
-schedule_replicate10LeastLoaded$Scheduler <- "Replicate10LeastLoaded"
+schedule_location_based$Scheduler <- "LocalityBased"
+schedule_replicate3LeastLoaded$Scheduler <- "Replicate3"
+schedule_replicate10LeastLoaded$Scheduler <- "Replicate10"
 schedule_fullrep$Scheduler <- "FullReplicate"
 
 # To compute and save the max_ and the mean_ waiting time
@@ -140,7 +140,7 @@ df_all_gathered_1w_03 <- gather(df_all_1w_03,
                           value = "values",
                           -batsim_version, -Scheduler)
 
-df_all_gathered_1w_03$workload <- '1w_03'
+df_all_gathered_1w_03$Workload <- '1w_03'
 
 
 # To read the input files
@@ -174,9 +174,9 @@ jobs_time_fullrep <- jobs_time_fullrep %>% filter(jobs_time_fullrep$start_time !
 
 # To add a column for the Scheduler name
 schedule_standard$Scheduler <- "Standard"
-schedule_location_based$Scheduler <- "LocationBased"
-schedule_replicate3LeastLoaded$Scheduler <- "Replicate3LeastLoaded"
-schedule_replicate10LeastLoaded$Scheduler <- "Replicate10LeastLoaded"
+schedule_location_based$Scheduler <- "LocalityBased"
+schedule_replicate3LeastLoaded$Scheduler <- "Replicate3"
+schedule_replicate10LeastLoaded$Scheduler <- "Replicate10"
 schedule_fullrep$Scheduler <- "FullReplicate"
 
 # To compute and save the max_ and the mean_ waiting time
@@ -278,7 +278,7 @@ df_all_gathered_1w_10 <- gather(df_all_1w_10,
                           value = "values",
                           -batsim_version, -Scheduler)
 
-df_all_gathered_1w_10$workload <- '1w_10'
+df_all_gathered_1w_10$Workload <- '1w_10'
 
 
 # To read the input files
@@ -312,9 +312,9 @@ jobs_time_fullrep <- jobs_time_fullrep %>% filter(jobs_time_fullrep$start_time !
 
 # To add a column for the Scheduler name
 schedule_standard$Scheduler <- "Standard"
-schedule_location_based$Scheduler <- "LocationBased"
-schedule_replicate3LeastLoaded$Scheduler <- "Replicate3LeastLoaded"
-schedule_replicate10LeastLoaded$Scheduler <- "Replicate10LeastLoaded"
+schedule_location_based$Scheduler <- "LocalityBased"
+schedule_replicate3LeastLoaded$Scheduler <- "Replicate3"
+schedule_replicate10LeastLoaded$Scheduler <- "Replicate10"
 schedule_fullrep$Scheduler <- "FullReplicate"
 
 # To compute and save the max_ and the mean_ waiting time
@@ -414,7 +414,7 @@ df_all_gathered_1w_17 <- gather(df_all_1w_17,
                           value = "values",
                           -batsim_version, -Scheduler)
 
-df_all_gathered_1w_17$workload <- '1w_17'
+df_all_gathered_1w_17$Workload <- '1w_17'
 
 
 
@@ -450,9 +450,9 @@ jobs_time_fullrep <- jobs_time_fullrep %>% filter(jobs_time_fullrep$start_time !
 
 # To add a column for the Scheduler name
 schedule_standard$Scheduler <- "Standard"
-schedule_location_based$Scheduler <- "LocationBased"
-schedule_replicate3LeastLoaded$Scheduler <- "Replicate3LeastLoaded"
-schedule_replicate10LeastLoaded$Scheduler <- "Replicate10LeastLoaded"
+schedule_location_based$Scheduler <- "LocalityBased"
+schedule_replicate3LeastLoaded$Scheduler <- "Replicate3"
+schedule_replicate10LeastLoaded$Scheduler <- "Replicate10"
 schedule_fullrep$Scheduler <- "FullReplicate"
 
 # To compute and save the max_ and the mean_ waiting time
@@ -552,21 +552,20 @@ df_all_gathered_1w_24 <- gather(df_all_1w_24,
                           value = "values",
                           -batsim_version, -Scheduler)
 
-df_all_gathered_1w_24$workload <- '1w_24'
-
+df_all_gathered_1w_24$Workload <- '1w_24'
 
 #str(df_all_1w_03)
-df_all_1w_03$workload <- 1
-df_all_1w_10$workload <- 2
-df_all_1w_17$workload <- 3
-df_all_1w_24$workload <- 4
+df_all_1w_03$Workload <- '1w_03'
+df_all_1w_10$Workload <- '1w_10'
+df_all_1w_17$Workload <- '1w_17'
+df_all_1w_24$Workload <- '1w_24'
 
 df_all_weeks <- rbind(df_all_1w_03, df_all_1w_10, df_all_1w_17, df_all_1w_24)
 #df_all_weeks <- rbind(df_all_1w_10, df_all_1w_17, df_all_1w_24)
 #str(df_all_weeks)
 
-#df_all_weeks_data <- c(df_all_weeks$workload,df_all_weeks$max_bsd)
-df_all_weeks_data <- df_all_weeks %>% select(workload, 
+#df_all_weeks_data <- c(df_all_weeks$Workload,df_all_weeks$max_bsd)
+df_all_weeks_data <- df_all_weeks %>% select(Workload, 
                                              Scheduler, 
                                              nb_transfers_real, 
                                              total_transferred_GB, 
@@ -585,21 +584,25 @@ df_all_gathered <- gather(df_all_weeks_data,
                           factor_key = TRUE, 
                           key = "metrics", 
                           value = "values",
-                          -Scheduler, -workload)
+                          -Scheduler, -Workload)
+
+
+#------------------------------------------------------------------------------------------ Waiting time
 
 
 #write.csv(df_plot, file = "metrics.csv")
 df_plot <- subset(df_all_gathered, 
-                  metrics == 'max_waiting_time' |
-                  metrics == 'mean_waiting_time'
+                  metrics == 'max_waiting_time' #|
+                  #metrics == 'mean_waiting_time'
                  )
 
 labels <- c(
-            max_waiting_time = 'Max waiting time (s)' ,
-            mean_waiting_time = 'Mean waiting time (s)')
+            max_waiting_time = 'Max waiting time (s)' #,
+            #mean_waiting_time = 'Mean waiting time (s)'
+            )
 
 p <- 
-    ggplot(df_plot, aes(workload, values)) + 
+    ggplot(df_plot, aes(Workload, values)) + 
     #geom_point(alpha = 1) + geom_line(alpha = 1, linetype="dotted") +
     geom_bar(aes(fill = Scheduler), position = "dodge", stat="identity") +
     scale_fill_viridis_d() +
@@ -607,11 +610,12 @@ p <-
     scale_y_continuous(limits = c(0,NA), expand = expand_scale(mult = .1)) +
     #scale_x_discrete(expand = c(0.30,0.30)) +
     ggtitle("") + #"Comparison metrics for different Schedulers ") +
-    xlab("Workloads") +
+    #xlab("Workloads") +
     ylab("") +
     #theme_bw() +
     theme_gray() +
     theme(
+    	text = element_text(size=18),
         plot.title = element_text(hjust = 0.5),
         legend.position= "right",
         legend.justification = "center",
@@ -619,14 +623,88 @@ p <-
         panel.grid.major = element_blank())+
         #panel.grid.minor = element_blank())+
         #axis.text.x=element_blank(),
-    ggsave('short_metrics_waitingTime.png')
+    ggsave('short_metrics_max_waitingTime.png')
+
+df_plot <- subset(df_all_gathered, 
+                  #metrics == 'max_waiting_time' |
+                  metrics == 'mean_waiting_time'
+                 )
+
+labels <- c(
+            #max_waiting_time = 'Max waiting time (s)' ,
+            mean_waiting_time = 'Mean waiting time (s)')
+
+p <- 
+    ggplot(df_plot, aes(Workload, values)) + 
+    #geom_point(alpha = 1) + geom_line(alpha = 1, linetype="dotted") +
+    geom_bar(aes(fill = Scheduler), position = "dodge", stat="identity") +
+    scale_fill_viridis_d() +
+    facet_wrap(~ metrics, scales = "free_y", ncol = 1, labeller = labeller(metrics = labels)) +
+    scale_y_continuous(limits = c(0,NA), expand = expand_scale(mult = .1)) +
+    #scale_x_discrete(expand = c(0.30,0.30)) +
+    ggtitle("") + #"Comparison metrics for different Schedulers ") +
+    #xlab("Workloads") +
+    ylab("") +
+    #theme_bw() +
+    theme_gray() +
+    theme(
+    	text = element_text(size=18),
+        plot.title = element_text(hjust = 0.5),
+        legend.position= "right",
+        legend.justification = "center",
+        legend.direction = "vertical",
+        panel.grid.major = element_blank())+
+        #panel.grid.minor = element_blank())+
+        #axis.text.x=element_blank(),
+    ggsave('short_metrics_Mean_waitingTime.png')
+
+
+
+#------------------------------------------------------------------------------------------ BSD
 
 
 #write.csv(df_plot, file = "metrics.csv")
 df_plot <- subset(df_all_gathered, 
                   #metrics == 'mean_slow_down' |
                  # metrics == 'max_slow_down' |
-                  metrics == 'mean_bsd' |
+                  metrics == 'mean_bsd' #|
+                  #metrics == 'max_bsd' 
+                 )
+
+labels <- c(
+            
+            #mean_slow_down = 'mean slowdown' ,
+            #max_slow_down = 'max slowdown' ,
+            mean_bsd = 'Mean bounded slowdown (log10)' #,
+            #max_bsd = 'Max bounded slowdown (log10)'
+            )
+
+p <- 
+    ggplot(df_plot, aes(Workload, values)) + 
+    #geom_point(alpha = 1) + geom_line(alpha = 1, linetype="dotted") +
+    geom_bar(aes(fill = Scheduler), position = "dodge", stat="identity") +
+    scale_fill_viridis_d() +
+    facet_wrap(~ metrics, scales = "free_y", ncol = 1, labeller = labeller(metrics = labels)) +
+    scale_y_log10() +
+    ggtitle("") + #"Comparison metrics for different Schedulers ") +
+    #xlab("Workloads") +
+    ylab("") +
+    theme_gray() +
+    theme(
+    	text = element_text(size=18),
+        plot.title = element_text(hjust = 0.5),
+        legend.position= "right",
+        legend.justification = "center",
+        legend.direction = "vertical",
+        panel.grid.major = element_blank())+
+        #panel.grid.minor = element_blank())+
+        #axis.text.x=element_blank(),
+    ggsave('short_metrics_mean_slowdown.png')
+
+df_plot <- subset(df_all_gathered, 
+                  #metrics == 'mean_slow_down' |
+                 # metrics == 'max_slow_down' |
+                  #metrics == 'mean_bsd' #|
                   metrics == 'max_bsd' 
                  )
 
@@ -634,22 +712,23 @@ labels <- c(
             
             #mean_slow_down = 'mean slowdown' ,
             #max_slow_down = 'max slowdown' ,
-            mean_bsd = 'Mean bounded slowdown (log10)' ,
+            #mean_bsd = 'Mean bounded slowdown (log10)' #,
             max_bsd = 'Max bounded slowdown (log10)'
             )
 
 p <- 
-    ggplot(df_plot, aes(workload, values)) + 
+    ggplot(df_plot, aes(Workload, values)) + 
     #geom_point(alpha = 1) + geom_line(alpha = 1, linetype="dotted") +
     geom_bar(aes(fill = Scheduler), position = "dodge", stat="identity") +
     scale_fill_viridis_d() +
     facet_wrap(~ metrics, scales = "free_y", ncol = 1, labeller = labeller(metrics = labels)) +
     scale_y_log10() +
     ggtitle("") + #"Comparison metrics for different Schedulers ") +
-    xlab("Workloads") +
+    #xlab("Workloads") +
     ylab("") +
     theme_gray() +
     theme(
+    	text = element_text(size=18),
         plot.title = element_text(hjust = 0.5),
         legend.position= "right",
         legend.justification = "center",
@@ -657,23 +736,23 @@ p <-
         panel.grid.major = element_blank())+
         #panel.grid.minor = element_blank())+
         #axis.text.x=element_blank(),
-    ggsave('short_metrics_slowdown.png')
+    ggsave('short_metrics_meax_slowdown.png')
 
-
+#------------------------------------------------------------------------------------------ Data
 
 #write.csv(df_plot, file = "metrics.csv")
 df_plot <- subset(df_all_gathered, 
-                  metrics == 'total_transferred_GB' |
+                  #metrics == 'total_transferred_GB' |
                   metrics == 'nb_transfers_real' #|
                  )
 
 labels <- c(
-            total_transferred_GB = 'Total data transfered (GB)',
+            #total_transferred_GB = 'Total data transfered (GB)',
             nb_transfers_real = 'Number of data transfers')
 
 
 p <- 
-    ggplot(df_plot, aes(workload, values)) + 
+    ggplot(df_plot, aes(Workload, values)) + 
     #geom_point(alpha = 1) + geom_line(alpha = 1, linetype="dotted") +
     geom_bar(aes(fill = Scheduler), position = "dodge", stat="identity") +
     scale_fill_viridis_d() + 
@@ -682,11 +761,12 @@ p <-
     scale_y_continuous(limits = c(0,NA), expand = expand_scale(mult = .1)) +
     #scale_x_discrete(expand = c(0.30,0.30)) +
     ggtitle("") + #"Comparison metrics for different Schedulers ") +
-    xlab("Workloads") +
+    #xlab("Workloads") +
     ylab("") +
     #theme_bw() +
     theme_gray() +
     theme(
+    	text = element_text(size=18),
         plot.title = element_text(hjust = 0.5),
         legend.position= "right",
         legend.justification = "center",
@@ -694,4 +774,40 @@ p <-
         panel.grid.major = element_blank())+
         #panel.grid.minor = element_blank())+
         #axis.text.x=element_blank(),
-    ggsave('short_metrics_data.png')
+    ggsave('short_metrics_nb_transfers_data.png')
+
+df_plot <- subset(df_all_gathered, 
+                  metrics == 'total_transferred_GB' #|
+                  #metrics == 'nb_transfers_real' #|
+                 )
+
+labels <- c(
+            total_transferred_GB = 'Total data transfered (GB)'#,
+            #nb_transfers_real = 'Number of data transfers'
+            )
+
+
+p <- 
+    ggplot(df_plot, aes(Workload, values)) + 
+    #geom_point(alpha = 1) + geom_line(alpha = 1, linetype="dotted") +
+    geom_bar(aes(fill = Scheduler), position = "dodge", stat="identity") +
+    scale_fill_viridis_d() + 
+    facet_wrap(~ metrics, scales = "free_y", ncol = 1, labeller = labeller(metrics = labels)) +
+    #scale_y_continuous(limits = c(0,NA), expand = c(0.5,0)) +
+    scale_y_continuous(limits = c(0,NA), expand = expand_scale(mult = .1)) +
+    #scale_x_discrete(expand = c(0.30,0.30)) +
+    ggtitle("") + #"Comparison metrics for different Schedulers ") +
+    #xlab("Workloads") +
+    ylab("") +
+    #theme_bw() +
+    theme_gray() +
+    theme(
+    	text = element_text(size=18),
+        plot.title = element_text(hjust = 0.5),
+        legend.position= "right",
+        legend.justification = "center",
+        legend.direction = "vertical",
+        panel.grid.major = element_blank())+
+        #panel.grid.minor = element_blank())+
+        #axis.text.x=element_blank(),
+    ggsave('short_metrics_total_transferred_data.png')
